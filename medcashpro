@@ -1,0 +1,5186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>MedCash Pro™ – Professional Financial Dashboard for Medical Practices</title>
+<meta content="MedCash Pro™ – Professional financial dashboard for healthcare practices" name="description"/>
+<style>
+    /* MedCash Pro color palette */
+    :root{
+      --pine:#0f3d3e;
+      --aegean:#1f7a8c;
+      --coral:#e2725b;
+      --seamist:#c8e6d0;
+      --taupe:#d1c7bd;
+      --bg:#0b1220;
+      --panel:#0f172a;
+      --ink:#e8edf2;
+      --muted:#9aa6b2;
+      --brand:var(--aegean);
+      --accent:#10b981;
+      --warn:#f59e0b;
+      --danger:#ef4444;
+      --chip:#172554;
+      --success:#10b981;
+      --gridLine:rgba(255,255,255,.1);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:
+        radial-gradient(1000px 600px at 10% -10%, rgba(31,122,140,.25), transparent 55%),
+        radial-gradient(900px 520px at 110% 10%, rgba(226,114,91,.18), transparent 60%),
+        linear-gradient(135deg,#0b1220,#1a2440 60%);
+      color:var(--ink);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;
+      min-height:100vh;
+    }
+    .wrap{max-width:1600px;margin:22px auto;padding:0 16px}
+    .header{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      margin-bottom:20px;padding:16px;
+      background:rgba(255,255,255,.03);
+      border-radius:16px;border:1px solid rgba(255,255,255,.06);
+    }
+    h1{margin:0;font-size:26px;font-weight:900;
+      background:linear-gradient(135deg,var(--aegean),var(--coral));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    }
+    .sub{color:var(--muted);font-size:13px;margin-top:4px}
+    .pill{background:linear-gradient(135deg,#0b1220,#1e293b);border:1px solid #223047;border-radius:999px;padding:8px 14px;font-weight:700;font-size:12px}
+    .pill.active{background:linear-gradient(135deg,var(--pine),var(--aegean));border:none;color:white}
+
+/* Settings Modal */
+.settings-modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.7);
+  z-index:9999;
+  align-items:center;
+  justify-content:center;
+}
+.settings-modal.active{display:flex}
+.settings-content{
+  background:var(--panel);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:16px;
+  padding:24px;
+  width:90%;
+  max-width:600px;
+  max-height:80vh;
+  overflow-y:auto;
+}
+.settings-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+.settings-title{
+  font-size:18px;
+  font-weight:800;
+  background:linear-gradient(135deg,var(--aegean),var(--coral));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.settings-close{
+  cursor:pointer;
+  font-size:24px;
+  color:var(--muted);
+  background:none;
+  border:none;
+  padding:8px;
+  border-radius:4px;
+  transition:all .2s;
+}
+.settings-close:hover{
+  background:rgba(255,255,255,.1);
+  color:var(--ink);
+}
+.settings-section{
+  margin-bottom:20px;
+  padding:12px;
+  background:rgba(255,255,255,.03);
+  border-radius:8px;
+}
+.settings-label{
+  display:block;
+  margin-bottom:8px;
+  font-size:12px;
+  color:var(--muted);
+  font-weight:700;
+  text-transform:uppercase;
+}
+.settings-input{
+  width:100%;
+  background:#0b1220;
+  color:var(--ink);
+  border:1px solid #1f2937;
+  border-radius:8px;
+  padding:8px 12px;
+  font-size:14px;
+  margin-bottom:8px;
+}
+.shareholder-row{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  margin-bottom:8px;
+}
+.shareholder-row input{
+  flex:1;
+  margin-bottom:0;
+}
+.remove-shareholder{
+  background:var(--danger);
+  color:white;
+  border:none;
+  border-radius:4px;
+  padding:6px 8px;
+  cursor:pointer;
+  font-size:11px;
+}
+
+/* Save/Version Panel */
+.save-panel{
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:14px;
+  padding:16px;
+  margin-bottom:20px;
+}
+.save-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:12px;
+}
+.save-title{
+  font-size:14px;
+  font-weight:800;
+  color:var(--ink);
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.save-title::before{
+  content:'';
+  width:4px;
+  height:16px;
+  background:linear-gradient(135deg,var(--aegean),var(--coral));
+  border-radius:2px;
+}
+.version-info{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.version-badge{
+  padding:4px 12px;
+  border-radius:20px;
+  font-size:11px;
+  font-weight:700;
+  background:rgba(31,122,140,.15);
+  color:var(--aegean);
+  border:1px solid rgba(31,122,140,.3);
+}
+.save-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.save-note{
+  padding:10px;
+  background:rgba(16,185,129,.10);
+  border:1px solid rgba(16,185,129,.3);
+  border-radius:8px;
+  font-size:12px;
+  color:var(--ink);
+  margin-top:10px;
+}
+
+/* Tabs */
+.tabs{display:flex;gap:4px;margin-bottom:20px;background:rgba(255,255,255,.02);border-radius:12px;padding:4px}
+.tab{padding:12px 24px;background:transparent;color:var(--muted);border:none;border-radius:8px;cursor:pointer;font-weight:700;font-size:14px;transition:all .2s}
+.tab:hover{background:rgba(255,255,255,.05)}
+.tab.active{background:linear-gradient(135deg,var(--pine),var(--aegean));color:white}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.card{
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:14px;padding:16px;margin-bottom:14px;
+  backdrop-filter:blur(10px);
+}
+.card.full-width{padding:20px}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0;align-items:center}
+
+input[type=file],select,button,input[type=text],input[type=date],input[type=month],input[type=number]{
+  background:#0b1220;color:var(--ink);border:1px solid #1f2937;border-radius:10px;padding:10px 14px;font-size:13px;transition:all .2s;
+}
+input[type=file]:hover,select:hover,button:hover,input[type=month]:hover,input[type=number]:hover{border-color:var(--brand);transform:translateY(-1px)}
+button{cursor:pointer;font-weight:700}
+button.primary{background:linear-gradient(135deg,#1d4ed8,#2563eb);color:white;border:none;box-shadow:0 4px 12px rgba(29,78,216,.3)}
+button.success{background:linear-gradient(135deg,#059669,#10b981);color:white;border:none}
+button.coral{background:linear-gradient(135deg,#d35d47,#e2725b);color:white;border:none}
+button.ghost{background:transparent}
+
+/* Period selector */
+.period-selector{display:flex;gap:8px;align-items:center;background:rgba(255,255,255,.03);padding:8px;border-radius:10px}
+.period-type{display:flex;gap:4px}
+.period-btn{padding:8px 16px;background:transparent;border:1px solid rgba(255,255,255,.2);border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;transition:all .2s}
+.period-btn.active{background:var(--aegean);border-color:var(--aegean);color:white}
+
+.grid{display:grid;gap:14px}
+.g-2{grid-template-columns:1fr 1fr}
+.g-3{grid-template-columns:repeat(3,1fr)}
+.section-title{font-size:14px;font-weight:800;margin-bottom:12px;color:var(--ink);display:flex;align-items:center;gap:8px}
+.section-title::before{content:'';width:4px;height:16px;background:linear-gradient(135deg,var(--aegean),var(--coral));border-radius:2px}
+
+/* KPI Cards */
+.kpi{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:12px 0}
+.kpi.healthcare{grid-template-columns:repeat(4,1fr)}
+.kpi.shareholder{grid-template-columns:repeat(6,1fr)}
+.kpi .box{background:rgba(31,122,140,.10);border:1px solid rgba(31,122,140,.35);border-radius:12px;padding:14px;position:relative;overflow:hidden;transition:all .3s}
+.kpi .box:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(31,122,140,.25)}
+.kpi .box::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--aegean),var(--coral))}
+.kpi .title{font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.5px}
+.kpi .val{font-weight:900;font-size:20px;margin-top:6px}
+.kpi .change{font-size:11px;margin-top:4px;color:var(--seamist)}
+.kpi .trend{font-size:10px;margin-top:6px;padding:3px 8px;background:rgba(255,255,255,.1);border-radius:12px;display:inline-block}
+.success-box{background:rgba(16,185,129,.10)!important;border-color:rgba(16,185,129,.35)!important}
+.warn{background:rgba(245,158,11,.10)!important;border-color:rgba(245,158,11,.35)!important}
+.neg{background:rgba(239,68,68,.10)!important;border-color:rgba(239,68,68,.35)!important}
+.purple{background:rgba(168,85,247,.10)!important;border-color:rgba(168,85,247,.35)!important}
+.blue{background:rgba(59,130,246,.10)!important;border-color:rgba(59,130,246,.35)!important}
+
+/* Income Statement Styles */
+.income-statement{background:rgba(255,255,255,.03);border-radius:12px;padding:20px;margin:16px 0;overflow-x:auto}
+.stmt-header{font-size:18px;font-weight:900;margin-bottom:20px;text-align:center;
+  background:linear-gradient(135deg,var(--aegean),var(--coral));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.stmt-period{text-align:center;color:var(--muted);font-size:14px;margin-bottom:20px}
+
+/* Monthly income statement table */
+.stmt-table{width:100%;border-collapse:separate;border-spacing:0;min-width:1200px}
+.stmt-table th{background:rgba(31,122,140,.15);padding:8px;font-size:11px;font-weight:800;text-align:right;border-bottom:2px solid var(--aegean);white-space:nowrap}
+.stmt-table th:first-child{text-align:left;width:35%;position:sticky;left:0;background:rgba(31,122,140,.25);z-index:1}
+.stmt-table td{padding:6px 8px;font-size:12px;text-align:right;border-bottom:1px solid rgba(255,255,255,.05);white-space:nowrap}
+.stmt-table td:first-child{text-align:left;color:var(--ink);position:sticky;left:0;background:rgba(15,23,42,.95);z-index:1}
+.stmt-table tr:hover{background:rgba(31,122,140,.08)}
+.stmt-table .section-header{background:rgba(31,122,140,.10);font-weight:800;color:var(--ink)}
+.stmt-table .total-row{font-weight:900;background:rgba(31,122,140,.15);border-top:2px solid var(--aegean);border-bottom:2px solid var(--aegean)}
+.stmt-table .subtotal-row{font-weight:800;background:rgba(255,255,255,.05)}
+.stmt-table .ytd-col{background:rgba(226,114,91,.05);font-weight:700}
+
+/* Professional Financial Statements */
+.financial-statement {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #cccccc !important;
+  border-radius: 12px;
+  padding: 30px;
+  margin: 20px 0;
+  font-family: 'Georgia', 'Times New Roman', serif;
+}
+.statement-header {
+  text-align: center;
+  margin-bottom: 30px;
+  border-bottom: 2px solid #1f7a8c;
+  padding-bottom: 20px;
+}
+.company-name {
+  font-size: 22px;
+  font-weight: 900;
+  color: #000000 !important;
+  margin-bottom: 8px;
+}
+.company-address {
+  font-size: 13px;
+  color: #333333 !important;
+  line-height: 1.6;
+}
+.statement-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #000000 !important;
+  margin: 20px 0 10px 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.statement-date {
+  font-size: 14px;
+  color: #333333 !important;
+  font-style: italic;
+}
+.fin-table {
+  width: 100%;
+  margin: 20px 0;
+  font-size: 14px;
+  background: #ffffff !important;
+}
+.fin-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #e0e0e0;
+  color: #000000 !important;
+  background: #ffffff !important;
+}
+.fin-table .section-header td {
+  font-weight: 800;
+  font-size: 15px;
+  color: #000000 !important;
+  background: #f0f7fc !important;
+  padding: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.fin-table .line-item {
+  padding-left: 30px;
+  color: #000000 !important;
+}
+.fin-table .sub-item {
+  padding-left: 50px;
+  font-size: 13px;
+  color: #333333 !important;
+}
+.fin-table .total-line td {
+  font-weight: 900;
+  font-size: 15px;
+  border-top: 2px solid #1f7a8c;
+  border-bottom: 3px double #1f7a8c;
+  background: #e8f5f9 !important;
+  padding: 12px;
+  color: #000000 !important;
+}
+.fin-table .subtotal-line td {
+  font-weight: 700;
+  border-top: 1px solid #cccccc;
+  background: #f9f9f9 !important;
+  color: #000000 !important;
+}
+.fin-table .amount {
+  text-align: right;
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  color: #000000 !important;
+}
+.fin-table .negative {
+  color: #dc2626 !important;
+}
+.fin-table .positive {
+  color: #059669 !important;
+}
+
+/* Enhanced Balance Sheet Editor */
+.bs-editor {
+  margin-top: 10px;
+}
+.bs-section {
+  background: rgba(255,255,255,.02);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+.bs-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-bottom: 1px dashed rgba(255,255,255,.08);
+  transition: all 0.2s;
+}
+.bs-row:last-child {
+  border-bottom: none;
+}
+.bs-row:hover {
+  background: rgba(31,122,140,.05);
+}
+.bs-row .drag-handle {
+  cursor: grab;
+  font-size: 16px;
+  opacity: 0.7;
+  color: var(--muted);
+  width: 20px;
+  text-align: center;
+}
+.bs-row .drag-handle:hover {
+  opacity: 1;
+}
+.bs-row .account-name {
+  flex: 1;
+  min-width: 200px;
+  padding: 6px 10px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 6px;
+  color: var(--ink);
+}
+.bs-row .account-amount {
+  width: 140px;
+  text-align: right;
+  padding: 6px 10px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 6px;
+  color: var(--ink);
+}
+.bs-row .actions {
+  display: flex;
+  gap: 6px;
+}
+.bs-row .actions button {
+  padding: 4px 8px;
+  font-size: 11px;
+  border-radius: 4px;
+}
+.bs-row.sub-account {
+  padding-left: 40px;
+  opacity: 0.9;
+}
+.bs-row.sub-account .drag-handle {
+  opacity: 0.4;
+}
+.bs-section-total {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 12px;
+  margin-top: 8px;
+  font-weight: 900;
+  background: rgba(31,122,140,.12);
+  border: 1px solid rgba(31,122,140,.25);
+  border-radius: 8px;
+  color: var(--ink);
+}
+.bs-status {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 12px;
+}
+.bs-status.balanced {
+  background: rgba(16,185,129,.15);
+  border: 1px solid rgba(16,185,129,.35);
+  color: #86efac;
+}
+.bs-status.unbalanced {
+  background: rgba(245,158,11,.15);
+  border: 1px solid rgba(245,158,11,.35);
+  color: #fcd34d;
+}
+.bs-status.error {
+  background: rgba(239,68,68,.15);
+  border: 1px solid rgba(239,68,68,.35);
+  color: #fca5a5;
+}
+
+/* Shareholder-specific styles */
+.shareholder-table{width:100%;border-collapse:separate;border-spacing:0}
+.shareholder-table th{background:rgba(31,122,140,.15);padding:8px;font-size:11px;font-weight:800;text-align:right;border-bottom:2px solid var(--aegean);white-space:nowrap}
+.shareholder-table th:first-child{text-align:left;width:20%}
+.shareholder-table td{padding:6px 8px;font-size:12px;text-align:right;border-bottom:1px solid rgba(255,255,255,.05);white-space:nowrap}
+.shareholder-table td:first-child{text-align:left;color:var(--ink)}
+.shareholder-table tr:hover{background:rgba(31,122,140,.08)}
+.shareholder-table .total-row{font-weight:900;background:rgba(31,122,140,.15);border-top:2px solid var(--aegean)}
+
+.positive{color:var(--success)}
+.negative{color:var(--danger)}
+table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;overflow:hidden;border-radius:10px}
+th,td{border-bottom:1px solid rgba(255,255,255,.06);padding:10px;text-align:center}
+thead th{position:sticky;top:0;background:#0f172a;z-index:1;font-weight:700;text-transform:uppercase;font-size:11px;letter-spacing:.5px;color:var(--muted)}
+tbody tr:hover{background:rgba(31,122,140,.08)}
+.left{text-align:left}.right{text-align:right}.small{font-size:12px}.muted{color:var(--muted)}
+.tag{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:800}
+.tag.credit{background:#064e3b;color:#a7f3d0;border:1px solid #065f46}
+.tag.debit{background:#5f1d1d;color:#fee2e2;border:1px solid #7f1d1d}
+.tag.dist{background:#3c1f7a;color:#e9d5ff;border:1px solid #5b21b6}
+.stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:12px}
+.stat-item{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:10px}
+.stat-label{font-size:10px;color:var(--muted);text-transform:uppercase}
+.stat-value{font-size:16px;font-weight:800;margin-top:4px}
+.filter-section{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:12px;margin-bottom:12px}
+.note{padding:12px;border-radius:10px;background:rgba(31,122,140,.10);border:1px solid rgba(31,122,140,.35);margin:10px 0}
+.status-ready{background:rgba(16,185,129,.10);border-color:rgba(16,185,129,.35)}
+.chart-container{position:relative;height:300px;margin-top:12px}
+.chart-container.tall{height:350px}
+.chart-container.medium{height:280px}
+
+/* Description truncation styles */
+.desc-cell {
+  position: relative;
+  max-width: 300px;
+}
+.desc-short {
+  display: inline-block;
+  max-width: 250px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+.desc-expand {
+  display: inline-block;
+  margin-left: 5px;
+  color: var(--aegean);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 2px 6px;
+  background: rgba(31,122,140,.15);
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+.desc-expand:hover {
+  background: rgba(31,122,140,.25);
+  transform: translateY(-1px);
+}
+.desc-full {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: 100%;
+  background: var(--panel);
+  border: 1px solid var(--aegean);
+  border-radius: 8px;
+  padding: 12px;
+  width: 400px;
+  max-width: 90vw;
+  z-index: 1000;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  margin-top: 4px;
+}
+.desc-full.active {
+  display: block;
+}
+.desc-full-text {
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+.desc-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 18px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+.desc-close:hover {
+  background: rgba(255,255,255,.1);
+  color: var(--ink);
+}
+
+/* Export controls */
+.export-controls {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+  justify-content: flex-end;
+}
+
+/* Generate All Button */
+.generate-all-btn {
+  background: linear-gradient(135deg, #1f7a8c, #e2725b) !important;
+  color: white !important;
+  padding: 12px 24px !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  border: none !important;
+  border-radius: 10px !important;
+  box-shadow: 0 6px 20px rgba(31,122,140,.4) !important;
+  transition: all 0.3s !important;
+  cursor: pointer !important;
+}
+.generate-all-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(31,122,140,.5) !important;
+}
+
+/* Category Management */
+.category-manager {
+  background: rgba(255,255,255,.02);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.category-section {
+  margin-bottom: 20px;
+}
+
+.category-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.category-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(31,122,140,.1);
+  border: 1px solid rgba(31,122,140,.3);
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.category-remove {
+  background: var(--danger);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.category-add-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.category-add-row input {
+  flex: 1;
+}
+
+@media (max-width:1200px){.kpi{grid-template-columns:repeat(3,1fr)}.kpi.healthcare{grid-template-columns:repeat(2,1fr)}.kpi.shareholder{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:980px){.kpi{grid-template-columns:repeat(2,1fr)}.g-2{grid-template-columns:1fr}.stats-grid{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:600px){.g-3{grid-template-columns:1fr}.stmt-table{font-size:10px}.stmt-table td{padding:4px}}
+
+/* Print styles for financial statements */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .financial-statement {
+    page-break-inside: avoid;
+    border: 1px solid #cccccc !important;
+    background: white !important;
+    color: black !important;
+  }
+  .financial-statement * {
+    color: black !important;
+    background: white !important;
+  }
+  .fin-table .section-header td {
+    background: #f0f0f0 !important;
+  }
+  .fin-table .total-line td {
+    background: #e0e0e0 !important;
+  }
+  .fin-table .subtotal-line td {
+    background: #f5f5f5 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+</head>
+<body>
+
+<!-- Settings Modal -->
+<div class="settings-modal" id="settingsModal">
+  <div class="settings-content">
+    <div class="settings-header">
+      <div class="settings-title">Dashboard Settings</div>
+      <button class="settings-close" onclick="closeSettings()">×</button>
+    </div>
+    
+    <div class="settings-section">
+      <label class="settings-label">Practice Name</label>
+      <input type="text" class="settings-input" id="practiceName" value="Your Medical Practice">
+    </div>
+    
+    <div class="settings-section">
+      <label class="settings-label">Practice Address</label>
+      <input type="text" class="settings-input" id="practiceAddress1" value="123 Main Street, Suite 100">
+      <input type="text" class="settings-input" id="practiceAddress2" value="City, State 12345">
+    </div>
+    
+    <div class="settings-section">
+      <label class="settings-label">Shareholders/Owners</label>
+      <div id="shareholdersList"></div>
+      <div class="category-add-row">
+        <input type="text" class="settings-input" id="newShareholderName" placeholder="Shareholder name">
+        <input type="number" class="settings-input" id="newShareholderPercent" placeholder="%" min="0" max="100" style="width:80px">
+        <button class="success" onclick="addShareholder()">Add</button>
+      </div>
+    </div>
+    
+    <div class="settings-section">
+      <label class="settings-label">Default Period Type</label>
+      <select class="settings-input" id="defaultPeriodType">
+        <option value="month">Month</option>
+        <option value="quarter">Quarter</option>
+        <option value="year">Year</option>
+        <option value="ttm">TTM (Trailing Twelve Months)</option>
+      </select>
+    </div>
+    
+    <div class="controls" style="justify-content:flex-end;margin-top:20px">
+      <button class="ghost" onclick="closeSettings()">Cancel</button>
+      <button class="success" onclick="saveSettings()">Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+<div class="header">
+  <div>
+    <h1>MedCash Pro™</h1>
+    <div class="sub">Professional Financial Dashboard • <span id="practiceDisplayName">Your Medical Practice</span> • Practice Analytics Suite</div>
+  </div>
+  <div class="controls">
+    <span class="pill">Powered by MedCash Pro™</span>
+    <button class="pill" id="btn-settings" onclick="openSettings()">⚙️ Settings</button>
+    <span class="pill active" id="currentOwnerPill">Practice Owner</span>
+    <span class="pill" id="periodPill">No data loaded</span>
+    <span class="pill" id="accountPill">Account: —</span>
+  </div>
+</div>
+
+<!-- Save/Version Management Panel -->
+<div class="save-panel">
+  <div class="save-header">
+    <div class="save-title">Save & Version Management</div>
+    <div class="version-info">
+      <span class="version-badge" id="currentVersion">No data loaded</span>
+      <span class="small muted" id="dataStatus"></span>
+    </div>
+  </div>
+  <div class="save-actions">
+    <input id="versionName" placeholder="Enter version name (e.g., 'TTM Aug 2024-Jul 2025')" style="width:300px" type="text"/>
+    <button class="success" id="saveVersionBtn" style="display:none">
+      💾 Download This Version
+    </button>
+    <button class="primary" id="loadVersionBtn">
+      📂 Load Saved Version
+    </button>
+    <input accept=".html" id="loadVersionFile" style="display:none" type="file"/>
+    <button class="ghost" id="exportDataBtn" style="display:none">
+      📋 Export Data Only (JSON)
+    </button>
+  </div>
+  <div class="save-note" id="saveInstructions">
+    <strong>💡 How This Works:</strong><br/>
+    • <strong>Download Version:</strong> Saves a complete copy of this dashboard WITH your current data embedded inside the HTML file<br/>
+    • <strong>Load Version:</strong> Open a previously saved dashboard file to restore all data and settings<br/>
+    • <strong>Version Name:</strong> Give each save a descriptive name like "TTM Aug-Jul 2025" or "Q1 2025 Final"<br/>
+    • <strong>TTM Support:</strong> Use the TTM (Trailing Twelve Months) option to analyze any 12-month period<br/>
+    • Each saved file is completely self-contained - just open it in any browser to continue working!
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('dashboard')">Cash Flow Dashboard</button>
+  <button class="tab" onclick="switchTab('income-statement')">Income Statement</button>
+  <button class="tab" onclick="switchTab('balance-sheet')">Balance Sheet</button>
+  <button class="tab" onclick="switchTab('cash-flow')">Cash Flow Statement</button>
+  <button class="tab" onclick="switchTab('shareholders')">Shareholders</button>
+  <button class="tab" onclick="switchTab('transactions')">Transactions</button>
+  <button class="tab" onclick="switchTab('analytics')">Practice Analytics</button>
+  <button class="tab" onclick="switchTab('categories')">Category Manager</button>
+</div>
+
+<!-- Dashboard Tab -->
+<div class="tab-content active" id="dashboard-tab">
+  <!-- Data & Period Controls -->
+  <div class="card">
+    <div class="section-title">Data Import & Analysis Period</div>
+    <div class="controls">
+      <input accept=".csv,text/csv" id="fileInput" type="file"/>
+      <button class="primary" id="loadBtn">
+        <span id="loadBtnText">Load Bank CSV</span>
+      </button>
+      <button class="ghost" id="downloadTemplate">Download Template</button>
+    </div>
+    <div class="controls">
+      <div class="period-selector">
+        <div class="period-type">
+          <button class="period-btn" data-type="year" onclick="setPeriodType('year')">Year</button>
+          <button class="period-btn" data-type="quarter" onclick="setPeriodType('quarter')">Quarter</button>
+          <button class="period-btn active" data-type="month" onclick="setPeriodType('month')">Month</button>
+          <button class="period-btn" data-type="ttm" onclick="setPeriodType('ttm')">TTM</button>
+        </div>
+        <div id="periodInputs" style="display:flex;gap:8px;align-items:center">
+          <input id="periodPicker" style="display:block" type="month"/>
+          <select id="yearPicker" style="display:none">
+            <option value="">Select Year</option>
+            <option value="2026">2026</option>
+            <option value="2025">2025</option>
+            <option value="2024">2024</option>
+            <option value="2023">2023</option>
+          </select>
+          <select id="quarterPicker" style="display:none">
+            <option value="">Select Quarter</option>
+            <option value="Q1">Q1 (Jan-Mar)</option>
+            <option value="Q2">Q2 (Apr-Jun)</option>
+            <option value="Q3">Q3 (Jul-Sep)</option>
+            <option value="Q4">Q4 (Oct-Dec)</option>
+          </select>
+          <div id="ttmPickers" style="display:none;gap:8px;align-items:center">
+            <label style="font-size:12px;color:var(--muted)">From:</label>
+            <input id="ttmStartMonth" type="month"/>
+            <label style="font-size:12px;color:var(--muted)">To:</label>
+            <input id="ttmEndMonth" type="month"/>
+          </div>
+        </div>
+        <input id="beginBal" placeholder="Beginning Balance" step="1" style="width:150px" type="number"/>
+        <button class="success" id="applyPeriod">Apply Period</button>
+        <button class="coral" id="resetPeriod">Reset</button>
+      </div>
+    </div>
+    <div class="note status-ready" id="statusBox" style="display:none">
+      <strong>✔ File Loaded</strong>
+      <span id="statusMsg"></span>
+    </div>
+  </div>
+  
+  <!-- Primary Care KPIs -->
+  <div class="card">
+    <div class="section-title">Financial Performance Indicators</div>
+    <div class="kpi">
+      <div class="box success-box">
+        <div class="title">Total Revenue</div>
+        <div class="val" id="kpiRevenue">$0</div>
+        <div class="change" id="kpiRevBreak">Patient: $0 • Insurance: $0</div>
+      </div>
+      <div class="box neg">
+        <div class="title">Operating Expenses</div>
+        <div class="val" id="kpiOpEx">$0</div>
+        <div class="change" id="kpiOpExCount">0 transactions</div>
+      </div>
+      <div class="box">
+        <div class="title">Net Income</div>
+        <div class="val" id="kpiNet">$0</div>
+        <div class="change">Margin: <span id="kpiMargin">0%</span></div>
+      </div>
+      <div class="box purple">
+        <div class="title">Total Distributions</div>
+        <div class="val" id="kpiDistributions">$0</div>
+        <div class="change" id="kpiDistributionsCount">0 transactions</div>
+      </div>
+      <div class="box">
+        <div class="title">Ending Cash</div>
+        <div class="val" id="kpiEndingCash">$0</div>
+        <div class="change">After all transactions</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Daily Cash Balances Chart -->
+  <div class="card full-width">
+    <div class="section-title">Daily Cash Balances</div>
+    <div class="chart-container tall">
+      <canvas id="cashBalanceChart"></canvas>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-label">Starting Balance</div>
+        <div class="stat-value" id="startingBalance">$0</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Ending Balance</div>
+        <div class="stat-value" id="endingBalance">$0</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Peak Balance</div>
+        <div class="stat-value" id="peakBalance">$0</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Lowest Balance</div>
+        <div class="stat-value" id="lowestBalance">$0</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Average Daily Balance</div>
+        <div class="stat-value" id="avgBalance">$0</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Daily Deposits Chart -->
+  <div class="card full-width">
+    <div class="section-title">Daily Deposits (Revenue)</div>
+    <div class="chart-container tall">
+      <canvas id="depositsChart"></canvas>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-label">Peak Deposit Day</div>
+        <div class="stat-value" id="peakDepositDay">—</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Average Daily Deposits</div>
+        <div class="stat-value" id="avgDailyDeposits">$0</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Deposit Volatility</div>
+        <div class="stat-value" id="depositVolatility">0%</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Days with Deposits</div>
+        <div class="stat-value" id="depositDays">0</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Total Period Deposits</div>
+        <div class="stat-value" id="totalDeposits">$0</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Revenue & Expense Charts -->
+  <div class="grid g-2">
+    <div class="card">
+      <div class="section-title">Daily Revenue Pattern</div>
+      <div class="chart-container medium">
+        <canvas id="revenueChart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">Daily Operating Expenses</div>
+      <div class="chart-container medium">
+        <canvas id="expenseChart"></canvas>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Mix Charts -->
+  <div class="grid g-3">
+    <div class="card">
+      <div class="section-title">Revenue Mix by Type</div>
+      <div class="chart-container">
+        <canvas id="revMixChart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">Insurance Payer Breakdown</div>
+      <div class="chart-container">
+        <canvas id="payerBreakdownChart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">Top Individual Payers</div>
+      <div class="chart-container">
+        <canvas id="topPayersChart"></canvas>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Expense Breakdown -->
+  <div class="card full-width">
+    <div class="section-title">Expense Categories</div>
+    <div class="chart-container medium">
+      <canvas id="expensePie"></canvas>
+    </div>
+  </div>
+  
+  <!-- Payer Analysis Section -->
+  <div class="card full-width">
+    <div class="section-title">Detailed Payer Analysis</div>
+    <div class="grid g-2">
+      <div class="chart-container medium">
+        <canvas id="medicaidChart"></canvas>
+      </div>
+      <div class="chart-container medium">
+        <canvas id="commercialChart"></canvas>
+      </div>
+    </div>
+    <div class="stats-grid" style="margin-top:16px">
+      <div class="stat-item">
+        <div class="stat-label">Medicaid % of Insurance</div>
+        <div class="stat-value" id="medicaidPercent">0%</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Commercial % of Insurance</div>
+        <div class="stat-value" id="commercialPercent">0%</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Top Medicaid Payer</div>
+        <div class="stat-value" id="topMedicaid">—</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Top Commercial Payer</div>
+        <div class="stat-value" id="topCommercial">—</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Other Revenue</div>
+        <div class="stat-value" id="otherRevenue">$0</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Income Statement Tab -->
+<div class="tab-content" id="income-statement-tab">
+  <div class="card">
+    <div class="export-controls no-print">
+      <button class="primary" onclick="exportStatementPDF('income')">📄 Export PDF</button>
+      <button class="success" onclick="exportStatementExcel('income')">📊 Export Excel</button>
+    </div>
+    <div class="financial-statement">
+      <div class="statement-header">
+        <div class="company-name" id="companyNameIncome">Your Medical Practice</div>
+        <div class="company-address" id="companyAddressIncome">
+          123 Main Street, Suite 100<br/>
+          City, State 12345
+        </div>
+        <div class="statement-title">Income Statement</div>
+        <div class="statement-date" id="incomeStmtDate">For the Period Ended —</div>
+      </div>
+      <table class="fin-table" id="incomeStatementTable">
+        <tbody id="incomeStmtBody">
+          <!-- Will be populated dynamically -->
+        </tbody>
+      </table>
+    </div>
+    <div class="income-statement">
+      <div class="stmt-header">MONTHLY INCOME STATEMENT DETAIL</div>
+      <div class="stmt-period" id="stmtPeriod">Period: Not Selected</div>
+      <table class="stmt-table" id="monthlyIncomeTable">
+        <thead>
+          <tr id="monthHeaders">
+            <th>Line Item</th>
+            <!-- Monthly columns will be added dynamically -->
+            <th class="ytd-col">YTD Total</th>
+          </tr>
+        </thead>
+        <tbody id="stmtTableBody">
+          <!-- Will be populated dynamically -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Balance Sheet Tab -->
+<div class="tab-content" id="balance-sheet-tab">
+  <!-- Enhanced Balance Sheet Editor -->
+  <div class="card no-print" id="balanceSheetEditorCard">
+    <div class="section-title">Interactive Balance Sheet Builder</div>
+    <div class="controls">
+      <label class="small muted">As of Date</label>
+      <input id="bs-as-of" type="date"/>
+      <button class="pill" id="bs-rebuild">🔄 Rebuild from Transactions</button>
+      <button class="pill" id="btn-add-asset">+ Add Asset</button>
+      <button class="pill" id="btn-add-liability">+ Add Liability</button>
+      <button class="pill" id="btn-add-equity">+ Add Equity</button>
+      <button class="pill" id="bs-export-csv">📤 Export CSV</button>
+      <button class="pill" id="bs-import-csv">📥 Import CSV</button>
+      <input accept=".csv,text/csv" id="bs-import-file" style="display:none" type="file"/>
+      <span class="pill bs-status balanced" id="bs-status" style="margin-left:auto">Ready to Edit</span>
+    </div>
+    <div class="note">
+      <strong>💡 Interactive Features:</strong> Drag rows to reorder • Click amounts to edit inline • Use "Add Sub" for sub-accounts • All changes auto-calculate
+    </div>
+    <div class="grid g-3" style="align-items:flex-start">
+      <div class="card" style="min-height:300px">
+        <div class="section-title">Assets</div>
+        <div class="bs-editor" id="bs-assets">
+          <!-- Assets will be populated here -->
+        </div>
+        <div class="bs-section-total">
+          <span>Total Assets</span>
+          <span id="bs-assets-total">$0.00</span>
+        </div>
+      </div>
+      <div class="card" style="min-height:300px">
+        <div class="section-title">Liabilities</div>
+        <div class="bs-editor" id="bs-liabilities">
+          <!-- Liabilities will be populated here -->
+        </div>
+        <div class="bs-section-total">
+          <span>Total Liabilities</span>
+          <span id="bs-liabilities-total">$0.00</span>
+        </div>
+      </div>
+      <div class="card" style="min-height:300px">
+        <div class="section-title">Owner's Equity</div>
+        <div class="bs-editor" id="bs-equity">
+          <!-- Equity will be populated here -->
+        </div>
+        <div class="bs-section-total">
+          <span>Total Equity</span>
+          <span id="bs-equity-total">$0.00</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="card">
+    <div class="export-controls no-print">
+      <button class="primary" onclick="exportStatementPDF('balance')">📄 Export PDF</button>
+      <button class="success" onclick="exportStatementExcel('balance')">📊 Export Excel</button>
+    </div>
+    <div class="financial-statement">
+      <div class="statement-header">
+        <div class="company-name" id="companyNameBalance">Your Medical Practice</div>
+        <div class="company-address" id="companyAddressBalance">
+          123 Main Street, Suite 100<br/>
+          City, State 12345
+        </div>
+        <div class="statement-title">Balance Sheet</div>
+        <div class="statement-date" id="balanceSheetDate">As of —</div>
+      </div>
+      <table class="fin-table" id="balanceSheetTable">
+        <tbody id="balanceSheetBody">
+          <!-- Will be populated dynamically -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Cash Flow Statement Tab -->
+<div class="tab-content" id="cash-flow-tab">
+  <div class="card">
+    <div class="export-controls no-print">
+      <button class="primary" onclick="exportStatementPDF('cashflow')">📄 Export PDF</button>
+      <button class="success" onclick="exportStatementExcel('cashflow')">📊 Export Excel</button>
+    </div>
+    <div class="financial-statement">
+      <div class="statement-header">
+        <div class="company-name" id="companyNameCashFlow">Your Medical Practice</div>
+        <div class="company-address" id="companyAddressCashFlow">
+          123 Main Street, Suite 100<br/>
+          City, State 12345
+        </div>
+        <div class="statement-title">Statement of Cash Flows</div>
+        <div class="statement-date" id="cashFlowDate">For the Period Ended —</div>
+      </div>
+      <table class="fin-table" id="cashFlowTable">
+        <tbody id="cashFlowBody">
+          <!-- Will be populated dynamically -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Shareholders Tab -->
+<div class="tab-content" id="shareholders-tab">
+  <div class="card">
+    <div class="section-title">Shareholder Analysis</div>
+    <div class="kpi shareholder">
+      <div class="box success-box">
+        <div class="title">Total Distributions</div>
+        <div class="val" id="shareholderTotalDist">$0</div>
+        <div class="change">Current period</div>
+      </div>
+      <div class="box blue">
+        <div class="title">Active Shareholders</div>
+        <div class="val" id="shareholderCount">0</div>
+        <div class="change">Registered owners</div>
+      </div>
+      <div class="box purple">
+        <div class="title">Avg Distribution</div>
+        <div class="val" id="shareholderAvgDist">$0</div>
+        <div class="change">Per shareholder</div>
+      </div>
+      <div class="box warn">
+        <div class="title">Distribution Rate</div>
+        <div class="val" id="shareholderDistRate">0%</div>
+        <div class="change">Of net income</div>
+      </div>
+      <div class="box">
+        <div class="title">Retained Earnings</div>
+        <div class="val" id="shareholderRetained">$0</div>
+        <div class="change">Undistributed profit</div>
+      </div>
+      <div class="box">
+        <div class="title">Monthly Avg</div>
+        <div class="val" id="shareholderMonthlyAvg">$0</div>
+        <div class="change">Per month</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="card">
+    <div class="section-title">Monthly Distribution Detail</div>
+    <div style="overflow-x:auto">
+      <table class="shareholder-table" id="shareholderTable">
+        <thead>
+          <tr id="shareholderHeaders">
+            <th>Month</th>
+            <!-- Shareholder columns will be added dynamically -->
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody id="shareholderTableBody">
+          <!-- Will be populated dynamically -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <div class="card full-width">
+    <div class="section-title">Shareholder Distribution Charts</div>
+    <div class="grid g-2">
+      <div class="chart-container medium">
+        <canvas id="shareholderPieChart"></canvas>
+      </div>
+      <div class="chart-container medium">
+        <canvas id="shareholderTrendChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Transactions Tab -->
+<div class="tab-content" id="transactions-tab">
+  <div class="card">
+    <div class="section-title">Transaction Detail</div>
+    <div class="note" style="background:rgba(16,185,129,.10);border-color:rgba(16,185,129,.35);margin-bottom:10px">
+      <strong>💡 Tips:</strong><br/>
+      • Click on any GL Category dropdown to manually reclassify transactions<br/>
+      • All distributions start as "Distribution (Unassigned)" - manually assign to specific shareholders<br/>
+      • <strong>Amount Search:</strong> Use Min/Max filters to find transactions by amount<br/>
+        - For exact amount: Enter same value in both (e.g., 2250 in both for specific expenses)<br/>
+        - For range: Enter different values (e.g., Min: 6000, Max: 7000 for rent range)<br/>
+      • <strong>Enhanced Auto-Coding Rules:</strong><br/>
+        - "BCBS" anywhere → Commercial - BCBS<br/>
+        - "MEDICAID" anywhere → Medicaid - SoonerCare<br/>
+        - "GLOBAL PAYMENTS" or "MOBILE DEPOSIT" → Patient Paid Revenue<br/>
+        - "GUSTO" → Payroll Expense<br/>
+      • <span style="color:#10b981">Green borders</span> indicate manually edited categories<br/>
+      • The Monthly Net column shows running totals that reset each month for easier reconciliation
+    </div>
+    <div class="controls">
+      <input id="searchBox" placeholder="Search description..." type="text"/>
+      <input id="amountMin" placeholder="Min (e.g., 2000)" step="0.01" style="width:130px" type="number"/>
+      <input id="amountMax" placeholder="Max (e.g., 2500)" step="0.01" style="width:130px" type="number"/>
+      <input id="dateFrom" type="date"/>
+      <input id="dateTo" type="date"/>
+      <select id="typeFilter">
+        <option value="">All Types</option>
+        <option value="Credit">Credits</option>
+        <option value="Debit">Debits</option>
+      </select>
+      <select id="expenseFilter" style="min-width:200px">
+        <option value="">All Categories</option>
+        <!-- Categories will be populated dynamically -->
+      </select>
+      <button id="exportFiltered">Export Filtered</button>
+      <button id="clearFilters">Clear Filters</button>
+      <button class="success" id="resetCategories">Reset to Auto-Categories</button>
+    </div>
+    <div class="filter-section">
+      <span class="small muted">Showing <span id="filteredCount">0</span> of <span id="totalCount">0</span> transactions</span>
+      <span class="small muted" id="filteredTotal" style="float:right">Net Income: $0</span>
+    </div>
+    <div style="max-height:520px;overflow-y:auto;overflow-x:auto">
+      
+<!-- === BULK REASSIGN: UI PANEL (Injected) === -->
+<div class="card" id="bulkReassignPanel" style="margin-top:8px">
+  <div class="section-title">Bulk Reassign Transactions</div>
+  <div class="controls" style="flex-wrap:wrap;gap:8px">
+    <button class="pill" id="bulkSelectAllFiltered">Select All (Filtered)</button>
+    <button class="pill" id="bulkClearSelection">Clear Selection</button>
+    <span class="small muted">Selected: <strong id="bulkSelectedCount">0</strong></span>
+    <span class="small muted" style="margin-left:16px">Quick select:</span>
+    <input type="text" id="bulkMatchText" placeholder="Match text in Description…" style="width:220px" />
+    <button class="pill" id="bulkFindMatch">Find & Select</button>
+    <span class="small muted" style="margin-left:16px">Reassign to GL Category:</span>
+    <select id="bulkCategoryTarget" style="min-width:260px">
+      <option value="">— choose category —</option>
+    </select>
+    <button class="success" id="bulkApplyCategory">Apply to Selected</button>
+  </div>
+  <div class="small muted" style="margin-top:6px">
+    Tip: Use the filters above the table first, then click <em>Select All (Filtered)</em> to capture everything currently shown. 
+    The change is applied to each row’s “GL Category” dropdown and triggers your existing recalc logic.
+  </div>
+</div>
+<!-- === /BULK REASSIGN: UI PANEL === -->
+<table id="txnTable">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Account</th>
+            <th class="left" style="min-width:300px">Description</th>
+            <th>Check #</th>
+            <th style="min-width:280px">GL Category</th>
+            <th>Type</th>
+            <th>Debit</th>
+            <th>Credit</th>
+            <th>Running Net</th>
+            <th>Monthly Net</th>
+            <th>Cash Balance</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Analytics Tab -->
+<div class="tab-content" id="analytics-tab">
+  <div class="card">
+    <div class="section-title">Practice Health Metrics</div>
+    <div class="kpi healthcare">
+      <div class="box success-box">
+        <div class="title">Revenue Per Day</div>
+        <div class="val" id="kpiRevPerDay">$0</div>
+        <div class="change">Average daily collections</div>
+      </div>
+      <div class="box purple">
+        <div class="title">Days Cash on Hand</div>
+        <div class="val" id="kpiDaysCash">0</div>
+        <div class="change">Based on daily OpEx</div>
+      </div>
+      <div class="box">
+        <div class="title">Patient Revenue %</div>
+        <div class="val" id="kpiPatientMix">0%</div>
+        <div class="change">Direct patient payments</div>
+      </div>
+      <div class="box warn">
+        <div class="title">Payer Concentration</div>
+        <div class="val" id="kpiPayerConc">0%</div>
+        <div class="change">Top 3 payers</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="grid g-2">
+    <div class="card">
+      <div class="section-title">Weekly Revenue Pattern</div>
+      <div class="chart-container">
+        <canvas id="weeklyChart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">Monthly Trend</div>
+      <div class="chart-container">
+        <canvas id="monthlyTrendChart"></canvas>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Generate All Financial Statements Button -->
+  <div class="card" style="text-align:center;padding:30px;background:linear-gradient(135deg,rgba(31,122,140,.1),rgba(226,114,91,.1));border:2px solid rgba(31,122,140,.5)">
+    <div class="section-title" style="justify-content:center;margin-bottom:20px">📊 Complete Financial Statement Package</div>
+    <button class="generate-all-btn" onclick="generateAllStatements()">🚀 Generate All Financial Statements (PDF)</button>
+    <div class="small muted" style="margin-top:15px">
+      Generates Income Statement, Balance Sheet, and Cash Flow Statement in a single PDF document
+    </div>
+  </div>
+</div>
+
+<!-- Category Manager Tab -->
+<div class="tab-content" id="categories-tab">
+  <div class="card">
+    <div class="section-title">Revenue Categories Management</div>
+    <div class="category-manager">
+      <div class="category-section">
+        <div class="section-title">Revenue Categories</div>
+        <div class="category-list" id="revenueCategoriesList"></div>
+        <div class="category-add-row">
+          <input type="text" id="newRevenueCategory" placeholder="Enter new revenue category (e.g., 'Revenue: Telemedicine')" />
+          <button class="success" onclick="addCustomCategory('revenue')">Add Revenue Category</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Expense Categories Management</div>
+    <div class="category-manager">
+      <div class="category-section">
+        <div class="section-title">Expense Categories</div>
+        <div class="category-list" id="expenseCategoriesList"></div>
+        <div class="category-add-row">
+          <input type="text" id="newExpenseCategory" placeholder="Enter new expense category (e.g., 'Supervising Physician')" />
+          <button class="success" onclick="addCustomCategory('expense')">Add Expense Category</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Equity/Capital Categories Management</div>
+    <div class="category-manager">
+      <div class="category-section">
+        <div class="section-title">Equity Categories</div>
+        <div class="category-list" id="equityCategoriesList"></div>
+        <div class="category-add-row">
+          <input type="text" id="newEquityCategory" placeholder="Enter new equity category (e.g., 'Partner Investment')" />
+          <button class="success" onclick="addCustomCategory('equity')">Add Equity Category</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Liabilities/Debt Payment Categories Management</div>
+    <div class="category-manager">
+      <div class="category-section">
+        <div class="section-title">Liability/Principal Payment Categories</div>
+        <div class="category-list" id="liabilityCategoriesList"></div>
+        <div class="category-add-row">
+          <input type="text" id="newLiabilityCategory" placeholder="Enter new liability category (e.g., 'Real Estate Loan Principal')" />
+          <button class="success" onclick="addCustomCategory('liability')">Add Liability Category</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="note">
+      <strong>💡 Category Management:</strong><br/>
+      • Add custom revenue, expense, equity, and liability categories to match your practice needs<br/>
+      • <strong>Equity categories</strong> are for capital contributions and investments (Credit transactions - not operating revenue)<br/>
+      • <strong>Liability categories</strong> are for loan principal payments (Debit transactions - reduce debt, not operating expense)<br/>
+      • <strong>Interest expense</strong> goes in Expense Categories (e.g., "Loan Interest Expense")<br/>
+      • For loan payments: classify principal portion as Liability, interest portion as Expense<br/>
+      • Categories are automatically available in transaction classification dropdowns<br/>
+      • Remove categories by clicking the × button (only custom categories can be removed)<br/>
+      • Default medical practice categories are included and cannot be removed<br/>
+      • Changes apply immediately to new transaction classifications
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<div class="card">
+  <div class="section-title">System Information</div>
+  <div class="small muted">
+    • <strong>MedCash Pro™:</strong> Professional financial dashboard for healthcare practices<br/>
+    • <strong>Enhanced Features:</strong> CPA-grade financial statements with PDF/Excel export<br/>
+    • <strong>Multi-Shareholder Support:</strong> Track distributions across multiple owners<br/>
+    • <strong>Smart Auto-Coding:</strong> Enhanced transaction categorization with Global Payments, Gusto integration<br/>
+    • <strong>Dynamic Categories:</strong> Add custom revenue and expense categories<br/>
+    • <strong>Financial Statements:</strong> Income Statement, Balance Sheet, Cash Flow Statement<br/>
+    • <strong>Professional Format:</strong> Company header, formal layout, export-ready<br/>
+    • Comprehensive financial tracking for healthcare practices<br/>
+    • TTM (Trailing Twelve Months) support for any 12-month period analysis<br/>
+    • Save/Load feature with embedded data for version control<br/>
+    <p id="buildTs"></p>
+  </div>
+</div>
+</div>
+
+<!-- Embedded Data Storage -->
+<script id="embeddedData" type="application/json">null</script>
+
+<script>
+// Initialize build timestamp
+document.getElementById('buildTs').textContent = '• Build: ' + new Date().toLocaleString();
+
+// Constants and configuration - UPDATED FOR NEW CSV FORMAT
+const EXPECTED_COLUMNS = ['Account Name', 'Processed Date', 'Description', 'Check Number', 'Credit or Debit', 'Amount'];
+
+// Global state
+let currentPeriodType = 'month';
+let allRows = [];
+let periodRows = [];
+let filteredRows = [];
+let charts = {
+  cashBalance: null, 
+  deposits: null, 
+  revenue: null, 
+  expense: null, 
+  revMix: null, 
+  payerBreakdown: null, 
+  topPayers: null, 
+  expensePie: null, 
+  weekly: null, 
+  monthlyTrend: null, 
+  medicaid: null, 
+  commercial: null,
+  shareholderPie: null,
+  shareholderTrend: null
+};
+let currentVersionName = '';
+let dataModified = false;
+
+// Enhanced Balance Sheet state with better structure
+let balanceSheetData = {
+  assets: [
+    { id: 'asset-1', name: 'Cash and Cash Equivalents', amount: 0, isSubAccount: false },
+    { id: 'asset-2', name: 'Accounts Receivable', amount: 0, isSubAccount: false },
+    { id: 'asset-3', name: 'Medical Equipment (Net)', amount: 0, isSubAccount: false },
+    { id: 'asset-4', name: 'Prepaid Expenses', amount: 0, isSubAccount: false }
+  ],
+  liabilities: [
+    { id: 'liability-1', name: 'Accounts Payable', amount: 0, isSubAccount: false },
+    { id: 'liability-2', name: 'Accrued Payroll', amount: 0, isSubAccount: false },
+    { id: 'liability-3', name: 'Equipment Notes Payable', amount: 0, isSubAccount: false }
+  ],
+  equity: [
+    { id: 'equity-1', name: "Owner's Capital", amount: 0, isSubAccount: false },
+    { id: 'equity-2', name: 'Current Period Net Income', amount: 0, isSubAccount: false },
+    { id: 'equity-3', name: 'Owner Distributions', amount: 0, isSubAccount: false }
+  ]
+};
+
+// Settings management with multi-shareholder support
+let settings = {
+  practiceName: 'Your Medical Practice',
+  practiceAddress1: '123 Main Street, Suite 100',
+  practiceAddress2: 'City, State 12345',
+  shareholders: [
+    { name: 'Practice Owner', percentage: 100 }
+  ],
+  defaultPeriodType: 'month'
+};
+
+// Enhanced category system
+let customCategories = {
+  revenue: [
+    'Revenue: Patient',
+    'Revenue: Insurance',
+    'Revenue: Medicaid - SoonerCare',
+    'Revenue: Medicaid - Aetna Better Health',
+    'Revenue: Medicaid - Oklahoma Complete',
+    'Revenue: Medicaid - Humana Healthy Horizons',
+    'Revenue: Commercial - BCBS',
+    'Revenue: Commercial - United Health',
+    'Revenue: Commercial - Aetna',
+    'Revenue: Commercial - Cigna',
+    'Revenue: Commercial - Humana',
+    'Revenue: Medicare',
+    'Revenue: Other Insurance'
+  ],
+  equity: [
+    'Capital Injection',
+    'Owner Contribution',
+    'Partner Investment',
+    'Member Capital',
+    'Investor Funding'
+  ],
+  liability: [
+    'Loan Principal Payment',
+    'Equipment Loan Principal',
+    'Line of Credit Principal',
+    'Note Payable Principal'
+  ],
+  expense: [
+    'Payroll',
+    'Rent',
+    'Professional Fees',
+    'Medical Supplies',
+    'Medical Supplies - McKesson',
+    'Supervising Physician Fees',
+    'CAM Services',
+    'Vaccines and Immunizations', 
+    'Insurance Premiums',
+    'Laboratory Services',
+    'Equipment Maintenance',
+    'Continuing Education',
+    'EMR Expense - Tebra',
+    'Security Expense',
+    'Non-Recurring Expense',
+    'Loan Interest Expense',
+    'Equipment Loan Interest',
+    'Line of Credit Interest',
+    'Other OpEx',
+    'Distribution',
+    'Distribution - Unassigned'
+  ]
+};
+
+// Load settings from localStorage if available
+try {
+  const savedSettings = localStorage.getItem('medcash_settings');
+  if (savedSettings) {
+    settings = { ...settings, ...JSON.parse(savedSettings) };
+  }
+  const savedCategories = localStorage.getItem('medcash_categories');
+  if (savedCategories) {
+    customCategories = { ...customCategories, ...JSON.parse(savedCategories) };
+  }
+} catch(e) {
+  console.log('Could not load settings from localStorage');
+}
+
+// Settings functions
+function openSettings() {
+  document.getElementById('practiceName').value = settings.practiceName;
+  document.getElementById('practiceAddress1').value = settings.practiceAddress1;
+  document.getElementById('practiceAddress2').value = settings.practiceAddress2;
+  document.getElementById('defaultPeriodType').value = settings.defaultPeriodType;
+  
+  renderShareholdersList();
+  document.getElementById('settingsModal').classList.add('active');
+}
+
+function closeSettings() {
+  document.getElementById('settingsModal').classList.remove('active');
+}
+
+function renderShareholdersList() {
+  const container = document.getElementById('shareholdersList');
+  container.innerHTML = '';
+  
+  settings.shareholders.forEach((shareholder, index) => {
+    const row = document.createElement('div');
+    row.className = 'shareholder-row';
+    row.innerHTML = `
+      <input type="text" value="${shareholder.name}" onchange="updateShareholder(${index}, 'name', this.value)" placeholder="Shareholder name" />
+      <input type="number" value="${shareholder.percentage}" onchange="updateShareholder(${index}, 'percentage', parseFloat(this.value) || 0)" min="0" max="100" style="width:80px" placeholder="%" />
+      ${settings.shareholders.length > 1 ? `<button class="remove-shareholder" onclick="removeShareholder(${index})">×</button>` : ''}
+    `;
+    container.appendChild(row);
+  });
+}
+
+function addShareholder() {
+  const name = document.getElementById('newShareholderName').value.trim();
+  const percentage = parseFloat(document.getElementById('newShareholderPercent').value) || 0;
+  
+  if (!name || percentage <= 0) {
+    alert('Please enter a valid shareholder name and percentage');
+    return;
+  }
+  
+  const totalPercentage = settings.shareholders.reduce((sum, s) => sum + s.percentage, 0) + percentage;
+  if (totalPercentage > 100) {
+    alert('Total percentage cannot exceed 100%');
+    return;
+  }
+  
+  settings.shareholders.push({ name, percentage });
+  document.getElementById('newShareholderName').value = '';
+  document.getElementById('newShareholderPercent').value = '';
+  renderShareholdersList();
+}
+
+function updateShareholder(index, field, value) {
+  if (settings.shareholders[index]) {
+    settings.shareholders[index][field] = value;
+  }
+}
+
+function removeShareholder(index) {
+  if (settings.shareholders.length > 1) {
+    settings.shareholders.splice(index, 1);
+    renderShareholdersList();
+  }
+}
+
+function saveSettings() {
+  settings.practiceName = document.getElementById('practiceName').value;
+  settings.practiceAddress1 = document.getElementById('practiceAddress1').value;
+  settings.practiceAddress2 = document.getElementById('practiceAddress2').value;
+  settings.defaultPeriodType = document.getElementById('defaultPeriodType').value;
+  
+  // Save to localStorage
+  try {
+    localStorage.setItem('medcash_settings', JSON.stringify(settings));
+    localStorage.setItem('medcash_categories', JSON.stringify(customCategories));
+  } catch(e) {
+    console.log('Could not save settings to localStorage');
+  }
+  
+  // Update UI with new settings
+  updateSettingsUI();
+  closeSettings();
+  
+  // Mark as modified
+  dataModified = true;
+  updateVersionDisplay();
+}
+
+function updateSettingsUI() {
+  // Update practice name display
+  document.getElementById('practiceDisplayName').textContent = settings.practiceName;
+  
+  // Update company names in financial statements
+  document.querySelectorAll('#companyNameIncome, #companyNameBalance, #companyNameCashFlow').forEach(el => {
+    el.textContent = settings.practiceName;
+  });
+  
+  // Update addresses
+  document.querySelectorAll('#companyAddressIncome, #companyAddressBalance, #companyAddressCashFlow').forEach(el => {
+    el.innerHTML = `${settings.practiceAddress1}<br/>${settings.practiceAddress2}`;
+  });
+  
+  // Update current owner pill
+  if (settings.shareholders.length > 0) {
+    document.getElementById('currentOwnerPill').textContent = 
+      settings.shareholders.length === 1 ? settings.shareholders[0].name : 
+      `${settings.shareholders.length} Shareholders`;
+  }
+  
+  // Set default period type
+  setPeriodType(settings.defaultPeriodType);
+  
+  // Update category filters
+  updateCategoryFilters();
+}
+
+// Category management functions
+function addCustomCategory(type) {
+  const inputId = type === 'revenue' ? 'newRevenueCategory' : 
+                  type === 'equity' ? 'newEquityCategory' :
+                  type === 'liability' ? 'newLiabilityCategory' : 'newExpenseCategory';
+  const category = document.getElementById(inputId).value.trim();
+  
+  if (!category) {
+    alert('Please enter a category name');
+    return;
+  }
+  
+  if (customCategories[type].includes(category)) {
+    alert('This category already exists');
+    return;
+  }
+  
+  customCategories[type].push(category);
+  document.getElementById(inputId).value = '';
+  renderCategoryLists();
+  updateCategoryFilters();
+  
+  // Save to localStorage
+  try {
+    localStorage.setItem('medcash_categories', JSON.stringify(customCategories));
+  } catch(e) {
+    console.log('Could not save categories');
+  }
+  
+  dataModified = true;
+  updateVersionDisplay();
+}
+
+function removeCustomCategory(type, category) {
+  const defaultCategories = {
+    revenue: ['Revenue: Patient', 'Revenue: Insurance', 'Revenue: Medicare'],
+    equity: ['Capital Injection', 'Owner Contribution', 'Partner Investment'],
+    liability: ['Loan Principal Payment', 'Equipment Loan Principal'],
+    expense: ['Payroll', 'Rent', 'Professional Fees', 'Medical Supplies', 'Other OpEx']
+  };
+  
+  if (defaultCategories[type].includes(category)) {
+    alert('Cannot remove default categories');
+    return;
+  }
+  
+  if (confirm(`Remove category "${category}"?`)) {
+    const index = customCategories[type].indexOf(category);
+    if (index > -1) {
+      customCategories[type].splice(index, 1);
+      renderCategoryLists();
+      updateCategoryFilters();
+      
+      try {
+        localStorage.setItem('medcash_categories', JSON.stringify(customCategories));
+      } catch(e) {
+        console.log('Could not save categories');
+      }
+      
+      dataModified = true;
+      updateVersionDisplay();
+    }
+  }
+}
+
+function renderCategoryLists() {
+  const revenueContainer = document.getElementById('revenueCategoriesList');
+  const equityContainer = document.getElementById('equityCategoriesList');
+  const liabilityContainer = document.getElementById('liabilityCategoriesList');
+  const expenseContainer = document.getElementById('expenseCategoriesList');
+  
+  revenueContainer.innerHTML = '';
+  customCategories.revenue.forEach(category => {
+    const item = document.createElement('div');
+    item.className = 'category-item';
+    item.innerHTML = `
+      <span>${category}</span>
+      <button class="category-remove" onclick="removeCustomCategory('revenue', '${category}')">×</button>
+    `;
+    revenueContainer.appendChild(item);
+  });
+  
+  equityContainer.innerHTML = '';
+  customCategories.equity.forEach(category => {
+    const item = document.createElement('div');
+    item.className = 'category-item';
+    item.innerHTML = `
+      <span>${category}</span>
+      <button class="category-remove" onclick="removeCustomCategory('equity', '${category}')">×</button>
+    `;
+    equityContainer.appendChild(item);
+  });
+  
+  liabilityContainer.innerHTML = '';
+  customCategories.liability.forEach(category => {
+    const item = document.createElement('div');
+    item.className = 'category-item';
+    item.innerHTML = `
+      <span>${category}</span>
+      <button class="category-remove" onclick="removeCustomCategory('liability', '${category}')">×</button>
+    `;
+    liabilityContainer.appendChild(item);
+  });
+  
+  expenseContainer.innerHTML = '';
+  customCategories.expense.forEach(category => {
+    const item = document.createElement('div');
+    item.className = 'category-item';
+    item.innerHTML = `
+      <span>${category}</span>
+      <button class="category-remove" onclick="removeCustomCategory('expense', '${category}')">×</button>
+    `;
+    expenseContainer.appendChild(item);
+  });
+}
+
+function updateCategoryFilters() {
+  const filter = document.getElementById('expenseFilter');
+  if (!filter) return;
+  
+  const currentValue = filter.value;
+  filter.innerHTML = '<option value="">All Categories</option>';
+  
+  // Add expense categories
+  customCategories.expense.forEach(cat => {
+    const option = document.createElement('option');
+    option.value = cat;
+    option.textContent = cat;
+    if (cat === currentValue) option.selected = true;
+    filter.appendChild(option);
+  });
+  
+  // Add revenue categories in optgroup
+  const revenueGroup = document.createElement('optgroup');
+  revenueGroup.label = 'Revenue Categories';
+  customCategories.revenue.forEach(cat => {
+    const option = document.createElement('option');
+    option.value = cat;
+    option.textContent = cat;
+    if (cat === currentValue) option.selected = true;
+    revenueGroup.appendChild(option);
+  });
+  filter.appendChild(revenueGroup);
+  
+  // Add equity categories in optgroup
+  const equityGroup = document.createElement('optgroup');
+  equityGroup.label = 'Equity/Capital Categories';
+  customCategories.equity.forEach(cat => {
+    const option = document.createElement('option');
+    option.value = cat;
+    option.textContent = cat;
+    if (cat === currentValue) option.selected = true;
+    equityGroup.appendChild(option);
+  });
+  filter.appendChild(equityGroup);
+  
+  // Add liability categories in optgroup
+  const liabilityGroup = document.createElement('optgroup');
+  liabilityGroup.label = 'Liability/Debt Payment Categories';
+  customCategories.liability.forEach(cat => {
+    const option = document.createElement('option');
+    option.value = cat;
+    option.textContent = cat;
+    if (cat === currentValue) option.selected = true;
+    liabilityGroup.appendChild(option);
+  });
+  filter.appendChild(liabilityGroup);
+}
+
+// Enhanced Balance Sheet Builder Functions
+function initBalanceSheet() {
+  renderBalanceSheetBuilder();
+  updateBalanceSheetStatus();
+}
+
+function renderBalanceSheetBuilder() {
+  renderBSSection('assets');
+  renderBSSection('liabilities');
+  renderBSSection('equity');
+  updateBSTotals();
+}
+
+function renderBSSection(sectionName) {
+  const container = document.getElementById(`bs-${sectionName}`);
+  const items = balanceSheetData[sectionName];
+  
+  container.innerHTML = '';
+  
+  items.forEach((item, index) => {
+    const row = document.createElement('div');
+    row.className = `bs-row ${item.isSubAccount ? 'sub-account' : ''}`;
+    row.draggable = true;
+    row.dataset.id = item.id;
+    row.dataset.section = sectionName;
+    row.dataset.index = index;
+    
+    row.innerHTML = `
+      <span class="drag-handle">⋮⋮</span>
+      <input type="text" class="account-name" value="${item.name}" 
+        onchange="updateBSItem('${sectionName}', ${index}, 'name', this.value)" 
+        placeholder="Account name"/>
+      <input type="number" class="account-amount" value="${item.amount}" step="0.01" 
+        onchange="updateBSItem('${sectionName}', ${index}, 'amount', parseFloat(this.value) || 0)" 
+        placeholder="0.00"/>
+      <div class="actions">
+        ${!item.isSubAccount ? `<button class="ghost" onclick="addBSSubAccount('${sectionName}', ${index})">+ Sub</button>` : ''}
+        <button class="ghost" onclick="removeBSItem('${sectionName}', ${index})">×</button>
+      </div>
+    `;
+    
+    // Add drag event listeners
+    row.addEventListener('dragstart', handleDragStart);
+    row.addEventListener('dragover', handleDragOver);
+    row.addEventListener('drop', handleDrop);
+    row.addEventListener('dragend', handleDragEnd);
+    
+    container.appendChild(row);
+  });
+}
+
+function addBSItem(section) {
+  const newItem = {
+    id: `${section}-${Date.now()}`,
+    name: `New ${section.charAt(0).toUpperCase() + section.slice(1, -1)}`,
+    amount: 0,
+    isSubAccount: false
+  };
+  balanceSheetData[section].push(newItem);
+  renderBalanceSheetBuilder();
+  dataModified = true;
+  updateVersionDisplay();
+}
+
+function addBSSubAccount(section, parentIndex) {
+  const newItem = {
+    id: `${section}-sub-${Date.now()}`,
+    name: 'Sub-account',
+    amount: 0,
+    isSubAccount: true
+  };
+  balanceSheetData[section].splice(parentIndex + 1, 0, newItem);
+  renderBalanceSheetBuilder();
+  dataModified = true;
+  updateVersionDisplay();
+}
+
+function removeBSItem(section, index) {
+  if (confirm('Remove this account?')) {
+    balanceSheetData[section].splice(index, 1);
+    renderBalanceSheetBuilder();
+    dataModified = true;
+    updateVersionDisplay();
+  }
+}
+
+function updateBSItem(section, index, field, value) {
+  if (balanceSheetData[section][index]) {
+    balanceSheetData[section][index][field] = value;
+    updateBSTotals();
+    updateBalanceSheetStatus();
+    dataModified = true;
+    updateVersionDisplay();
+  }
+}
+
+function updateBSTotals() {
+  const assetsTotal = balanceSheetData.assets.reduce((sum, item) => sum + (item.amount || 0), 0);
+  const liabilitiesTotal = balanceSheetData.liabilities.reduce((sum, item) => sum + (item.amount || 0), 0);
+  const equityTotal = balanceSheetData.equity.reduce((sum, item) => sum + (item.amount || 0), 0);
+  
+  document.getElementById('bs-assets-total').textContent = fmt(assetsTotal);
+  document.getElementById('bs-liabilities-total').textContent = fmt(liabilitiesTotal);
+  document.getElementById('bs-equity-total').textContent = fmt(equityTotal);
+  
+  updateBalanceSheetStatus();
+  
+  // Update the professional balance sheet
+  buildProfessionalBalanceSheet();
+}
+
+function updateBalanceSheetStatus() {
+  const assetsTotal = balanceSheetData.assets.reduce((sum, item) => sum + (item.amount || 0), 0);
+  const liabilitiesTotal = balanceSheetData.liabilities.reduce((sum, item) => sum + (item.amount || 0), 0);
+  const equityTotal = balanceSheetData.equity.reduce((sum, item) => sum + (item.amount || 0), 0);
+  
+  const status = document.getElementById('bs-status');
+  const diff = Math.abs(assetsTotal - (liabilitiesTotal + equityTotal));
+  
+  if (diff < 0.01) {
+    status.textContent = '✔ Balanced';
+    status.className = 'pill bs-status balanced';
+  } else {
+    status.textContent = `⚠ Off by ${fmt(diff)}`;
+    status.className = 'pill bs-status unbalanced';
+  }
+}
+
+// Drag and drop handlers for balance sheet
+let draggedElement = null;
+
+function handleDragStart(e) {
+  draggedElement = e.target;
+  e.target.style.opacity = '0.5';
+}
+
+function handleDragOver(e) {
+  if (e.preventDefault) {
+    e.preventDefault();
+  }
+  e.dataTransfer.dropEffect = 'move';
+  return false;
+}
+
+function handleDrop(e) {
+  if (e.stopPropagation) {
+    e.stopPropagation();
+  }
+  
+  if (draggedElement !== e.target && e.target.classList.contains('bs-row')) {
+    const draggedSection = draggedElement.dataset.section;
+    const draggedIndex = parseInt(draggedElement.dataset.index);
+    const targetSection = e.target.dataset.section;
+    const targetIndex = parseInt(e.target.dataset.index);
+    
+    if (draggedSection === targetSection) {
+      // Reorder within same section
+      const item = balanceSheetData[draggedSection].splice(draggedIndex, 1)[0];
+      balanceSheetData[targetSection].splice(targetIndex, 0, item);
+      renderBalanceSheetBuilder();
+      dataModified = true;
+      updateVersionDisplay();
+    }
+  }
+  
+  return false;
+}
+
+function handleDragEnd(e) {
+  e.target.style.opacity = '';
+  draggedElement = null;
+}
+
+function rebuildFromTransactions() {
+  if (periodRows.length === 0) {
+    alert('Please load data and select a period first.');
+    return;
+  }
+  
+  const beginBal = Number(document.getElementById('beginBal').value || 0);
+  
+  // Calculate values from transactions
+  let totalRevenue = 0, totalExpenses = 0, distributions = 0, capitalInjections = 0, principalPayments = 0;
+  
+  periodRows.forEach(row => {
+    if (row.type === 'Credit') {
+      if (isEquityCategory(row.revenueClass)) {
+        capitalInjections += row.amount;
+      } else {
+        totalRevenue += row.amount;
+      }
+    } else if (row.type === 'Debit') {
+      if (row.expenseClass && row.expenseClass.startsWith('Distribution')) {
+        distributions += row.amount;
+      } else if (isLiabilityCategory(row.expenseClass)) {
+        principalPayments += row.amount;
+      } else {
+        totalExpenses += row.amount;
+      }
+    }
+  });
+  
+  const netIncome = totalRevenue - totalExpenses;
+  const endingCash = beginBal + totalRevenue + capitalInjections - totalExpenses - distributions - principalPayments;
+  
+  // Update balance sheet with calculated values
+  if (balanceSheetData.assets[0]) {
+    balanceSheetData.assets[0].amount = endingCash; // Cash
+  }
+  if (balanceSheetData.equity[0]) {
+    balanceSheetData.equity[0].amount = beginBal + capitalInjections; // Owner's Capital (including capital injections)
+  }
+  if (balanceSheetData.equity[1]) {
+    balanceSheetData.equity[1].amount = netIncome; // Net Income
+  }
+  if (balanceSheetData.equity[2]) {
+    balanceSheetData.equity[2].amount = -distributions; // Distributions (negative)
+  }
+  
+  renderBalanceSheetBuilder();
+  
+  alert('Balance Sheet rebuilt from transaction data!');
+}
+
+function exportBStoCSV() {
+  let csv = 'Section,Account,Amount\n';
+  
+  ['assets', 'liabilities', 'equity'].forEach(section => {
+    balanceSheetData[section].forEach(item => {
+      csv += `${section},${item.name},${item.amount}\n`;
+    });
+  });
+  
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `balance_sheet_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importBSfromCSV() {
+  document.getElementById('bs-import-file').click();
+}
+
+// Balance Sheet event listeners
+document.getElementById('btn-add-asset').addEventListener('click', () => addBSItem('assets'));
+document.getElementById('btn-add-liability').addEventListener('click', () => addBSItem('liabilities'));
+document.getElementById('btn-add-equity').addEventListener('click', () => addBSItem('equity'));
+document.getElementById('bs-rebuild').addEventListener('click', rebuildFromTransactions);
+document.getElementById('bs-export-csv').addEventListener('click', exportBStoCSV);
+document.getElementById('bs-import-csv').addEventListener('click', importBSfromCSV);
+
+document.getElementById('bs-import-file').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  
+  try {
+    const text = await file.text();
+    const result = await new Promise((resolve, reject) => {
+      Papa.parse(text, {
+        header: true,
+        complete: resolve,
+        error: reject
+      });
+    });
+    
+    // Clear current data
+    balanceSheetData = { assets: [], liabilities: [], equity: [] };
+    
+    // Import data
+    result.data.forEach(row => {
+      if (row.Section && row.Account) {
+        const section = row.Section.toLowerCase();
+        if (balanceSheetData[section]) {
+          balanceSheetData[section].push({
+            id: `${section}-${Date.now()}-${Math.random()}`,
+            name: row.Account,
+            amount: parseFloat(row.Amount) || 0,
+            isSubAccount: false
+          });
+        }
+      }
+    });
+    
+    renderBalanceSheetBuilder();
+    alert('Balance Sheet imported successfully!');
+    dataModified = true;
+    updateVersionDisplay();
+  } catch(e) {
+    alert('Error importing CSV: ' + e.message);
+  }
+  
+  e.target.value = ''; // Reset input
+});
+
+// Check for embedded data on page load
+window.addEventListener('DOMContentLoaded', () => {
+  const embeddedDataElement = document.getElementById('embeddedData');
+  const embeddedData = embeddedDataElement.textContent;
+  
+  if (embeddedData && embeddedData !== 'null') {
+    try {
+      const data = JSON.parse(embeddedData);
+      restoreFromEmbeddedData(data);
+    } catch (e) {
+      console.error('Error loading embedded data:', e);
+    }
+  }
+  
+  // Set default TTM dates (current year)
+  const currentDate = new Date();
+  const lastYear = currentDate.getFullYear() - 1;
+  const currentMonth = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+  
+  document.getElementById('ttmStartMonth').value = `${lastYear}-${currentMonth}`;
+  document.getElementById('ttmEndMonth').value = `${currentDate.getFullYear()}-${currentMonth}`;
+  
+  // Initialize components
+  initBalanceSheet();
+  updateSettingsUI();
+  renderCategoryLists();
+  updateCategoryFilters();
+});
+
+// Formatting utilities
+const fmt = (n) => {
+  if (n === null || n === undefined || isNaN(n)) return '$0.00';
+  const abs = Math.abs(n);
+  return (n < 0 ? '-$' : '$') + abs.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+};
+
+const fmtCompact = (n) => {
+  if (n === null || n === undefined || isNaN(n)) return '$0';
+  const s = Math.abs(n);
+  if (s >= 1_000_000) return (n < 0 ? '-' : '') + '$' + (s/1_000_000).toFixed(1) + 'M';
+  if (s >= 1_000) return (n < 0 ? '-' : '') + '$' + (s/1_000).toFixed(1) + 'K';
+  return fmt(n);
+};
+
+const parseMoney = (v) => {
+  if (v === null || v === undefined || v === '') return 0;
+  if (typeof v === 'number') return v;
+  const s = String(v).replace(/[\$,]/g,'').trim();
+  if (!s || s === '-') return 0;
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+};
+
+// Parse date function for different date formats
+const parseDate = (dateStr) => {
+  if (!dateStr) return null;
+  
+  // Handle MM/DD/YYYY format (common in US bank exports)
+  if (dateStr.includes('/')) {
+    const parts = String(dateStr).split('/');
+    if (parts.length === 3) {
+      const [m,d,y] = parts;
+      return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+    }
+  }
+  
+  // Handle YYYY-MM-DD format (already correct)
+  if (dateStr.includes('-') && dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    return dateStr;
+  }
+  
+  // Handle other formats - try to parse with JavaScript Date
+  try {
+    const date = new Date(dateStr);
+    if (!isNaN(date)) {
+      return date.toISOString().slice(0, 10);
+    }
+  } catch (e) {
+    console.warn('Could not parse date:', dateStr);
+  }
+  
+  return dateStr;
+};
+
+const normalizeDesc = (s) => {
+  if (!s) return '';
+  s = s.toUpperCase().replace(/\s+/g,' ').trim();
+  s = s.replace(/(ACH |EFT |PPD |CCD |WEB |REV DUE TO FROM: |INTERNET TRANSFER FROM: |DEPOSIT |PAYMENT |POS |PURCHASE |DEBIT CARD |CHECK |WIRE )/g,'');
+  return s.slice(0,80);
+};
+
+const getDOW = (ds) => ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date(ds).getDay()];
+
+const getMonthName = (monthNum) => {
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return months[monthNum - 1] || '';
+};
+
+// Chart defaults
+Chart.defaults.color = '#9aa6b2';
+Chart.defaults.borderColor = 'rgba(255,255,255,.1)';
+Chart.defaults.font.family = 'system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif';
+
+function destroyCharts(){
+  Object.keys(charts).forEach(k=>{ 
+    if(charts[k]){ 
+      charts[k].destroy(); 
+      charts[k]=null; 
+    } 
+  });
+}
+
+// Period management
+function setPeriodType(type){
+  currentPeriodType = type;
+  document.querySelectorAll('.period-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.type === type);
+  });
+  
+  document.getElementById('periodPicker').style.display = type === 'month' ? 'block' : 'none';
+  document.getElementById('yearPicker').style.display = type === 'year' || type === 'quarter' ? 'block' : 'none';
+  document.getElementById('quarterPicker').style.display = type === 'quarter' ? 'block' : 'none';
+  document.getElementById('ttmPickers').style.display = type === 'ttm' ? 'flex' : 'none';
+  
+  const label = type === 'year' ? 'Jan 1 Balance' : 
+                type === 'quarter' ? 'Quarter Start Balance' : 
+                type === 'ttm' ? 'TTM Start Balance' : 
+                'Month Start Balance';
+  document.getElementById('beginBal').placeholder = label;
+  
+  dataModified = true;
+  updateVersionDisplay();
+}
+
+function getQuarterDates(year, quarter){
+  const quarters = {
+    'Q1': {start: `${year}-01-01`, end: `${year}-03-31`},
+    'Q2': {start: `${year}-04-01`, end: `${year}-06-30`},
+    'Q3': {start: `${year}-07-01`, end: `${year}-09-30`},
+    'Q4': {start: `${year}-10-01`, end: `${year}-12-31`}
+  };
+  return quarters[quarter];
+}
+
+// Tab switching with enhanced tab count
+function switchTab(tabName){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+  
+  const tabMap = {
+    'dashboard': 1,
+    'income-statement': 2,
+    'balance-sheet': 3,
+    'cash-flow': 4,
+    'shareholders': 5,
+    'transactions': 6,
+    'analytics': 7,
+    'categories': 8
+  };
+  
+  const tabIndex = tabMap[tabName] || 1;
+  document.querySelector(`.tab:nth-child(${tabIndex})`).classList.add('active');
+  document.getElementById(`${tabName}-tab`).classList.add('active');
+  
+  if(tabName === 'income-statement' && allRows.length > 0){
+    buildMonthlyIncomeStatement(allRows);
+    buildProfessionalStatements(periodRows);
+  }
+  if(tabName === 'balance-sheet' && periodRows.length > 0){
+    buildProfessionalStatements(periodRows);
+    buildProfessionalBalanceSheet();
+  }
+  if(tabName === 'cash-flow' && periodRows.length > 0){
+    buildProfessionalStatements(periodRows);
+  }
+  if(tabName === 'shareholders' && periodRows.length > 0){
+    buildShareholderAnalysis(periodRows);
+  }
+  if(tabName === 'categories'){
+    renderCategoryLists();
+  }
+}
+
+// Enhanced expense classification with new categories
+function classifyExpense(row){
+  const desc = (row.description||'').toUpperCase();
+  const amt = row.amount;
+  
+  // HIGH PRIORITY auto-categorization rules (checked first)
+  
+  // Exactly $3,500 is ALWAYS rent
+  if (amt === 3500) return 'Rent';
+  
+  // McKesson is ALWAYS medical supplies
+  if (desc.includes('MCKESSON')) return 'Medical Supplies - McKesson';
+  
+  // ADP is ALWAYS payroll
+  if (desc.includes('ADP')) return 'Payroll';
+  
+  // Tebra is ALWAYS EMR expense
+  if (desc.includes('TEBRA')) return 'EMR Expense - Tebra';
+  
+  // S2 is ALWAYS security expense
+  if (desc.includes('S2')) return 'Security Expense';
+  
+  // Enhanced auto-categorization rules
+  if (desc.includes('GUSTO')) return 'Payroll';
+  
+  // First Pay Debit and First Pay Check - always distribution
+  if (desc.includes('FIRST PAY DEBIT') || desc.includes('FIRST PAY CHECK')) return 'Distribution';
+  
+  // Global Payments debits - credit card processing fees
+  if (desc.includes('GLOBAL PAYMENTS')) return 'Credit Card Processing Fees';
+  
+  // Specific vendor/service classifications
+  if (desc.includes('DELTA DENTAL')) return 'Employer Paid Health & Dental Insurance';
+  if (desc.includes('CONKLIN')) return 'Accounting Fees';
+  if (desc.includes('UTIL')) return 'Utilities';
+  if (desc.includes('SSBTRUST')) return '401k Expense';
+  if (desc.includes('P/R CONTR SSBTRUSTOPS')) return '401k Expense';
+  if (desc.includes('OBPPAYMT HEALTH')) return 'Employer Paid Health & Dental Insurance';
+  
+  // Amount-based classifications
+  if (desc.includes('GSL') && amt > 6000) return 'Rent';
+  if (desc.includes('PAYMENTS FLORENCE HOUSE') && amt >= 6500 && amt <= 6550) return 'Rent';
+  if (desc.includes('PAYMENTS FLORENCE HOUSE') && amt >= 2000 && amt <= 2250) return 'Supervising Physician Fees';
+  if (amt >= 2000 && amt <= 2250) return 'Supervising Physician Fees';
+  
+  // Distribution patterns - ALL distributions start as unassigned
+  if (desc.includes('DISTRIBUTION')) return 'Distribution';
+  if (desc.includes('OWNER DRAW')) return 'Distribution';
+  if (desc.includes('OWNER DISTRIB')) return 'Distribution';
+  if (desc.includes('DIVIDEND')) return 'Distribution';
+  
+  // Check against shareholder names for distributions
+  for (const shareholder of settings.shareholders) {
+    if (desc.includes(shareholder.name.toUpperCase())) {
+      return 'Distribution';
+    }
+  }
+  
+  // Payroll
+  if (desc.includes('PAYROLL') || desc.includes('SALARY') || desc.includes('WAGES')) return 'Payroll';
+  
+  // Rent - enhanced detection
+  if (desc.includes('RENT') || desc.includes('LEASE')) return 'Rent';
+  
+  // Professional Fees
+  if (desc.includes('ATTORNEY') || desc.includes('CPA') || desc.includes('CONSULTANT')) return 'Professional Fees';
+  
+  // Medical-specific categories
+  if (desc.includes('SUPERVISING') || desc.includes('PHYSICIAN FEES') || desc.includes('SUPERVISING PHYSICIAN')) return 'Supervising Physician Fees';
+  if (desc.includes('CAM') || desc.includes('COMPLEMENTARY')) return 'CAM Services';
+  if (desc.includes('VACCINE') || desc.includes('IMMUNIZATION')) return 'Vaccines and Immunizations';
+  if (desc.includes('INSURANCE PREMIUM') || desc.includes('LIABILITY INSURANCE')) return 'Insurance Premiums';
+  if (desc.includes('LABORATORY') || desc.includes('LAB SERVICES')) return 'Laboratory Services';
+  if (desc.includes('EQUIPMENT MAINTENANCE') || desc.includes('REPAIR')) return 'Equipment Maintenance';
+  if (desc.includes('CONTINUING EDUCATION') || desc.includes('CME')) return 'Continuing Education';
+  
+  // Amex - Medical Supplies and Operating Expenses
+  if (desc.includes('AMEX') || desc.includes('AMERICAN EXPRESS')) return 'Medical Supplies';
+  
+  // Medical Supplies
+  if (desc.includes('MEDICAL') || desc.includes('SUPPLIES') || desc.includes('PHARMACY')) return 'Medical Supplies';
+  
+  // Everything else goes to Other OpEx
+  return 'Other OpEx';
+}
+
+function classifyRevenue(row){
+  const desc = (row.description||'').toUpperCase();
+  const amt = row.amount;
+  
+  // CAPITAL INJECTION DETECTION (highest priority - check first)
+  if (desc.includes('CAPITAL') || 
+      desc.includes('OWNER CONTRIBUTION') || 
+      desc.includes('INVESTOR') || 
+      desc.includes('EQUITY INJECTION') || 
+      desc.includes('CAPITAL CONTRIBUTION') ||
+      desc.includes('OWNER INVEST')) {
+    return 'Capital Injection';
+  }
+  
+  // TEBRA CREDITS are ALWAYS patient cash payments
+  if (desc.includes('TEBRA')) {
+    return 'Revenue: Patient';
+  }
+  
+  // Enhanced auto-categorization rules
+  if (desc.includes('GLOBAL PAYMENTS') || desc.includes('MOBILE DEPOSIT')) {
+    return 'Revenue: Patient'; // New rule
+  }
+  
+  // Patient payments
+  if (desc.includes('PATIENT') || desc.includes('COPAY') || desc.includes('CASH PAY')) return 'Revenue: Patient';
+  
+  // Insurance payments - Enhanced detection
+  if (desc.includes('BCBS') || desc.includes('BLUE CROSS')) return 'Revenue: Commercial - BCBS';
+  if (desc.includes('MEDICAID') || desc.includes('SOONER')) return 'Revenue: Medicaid - SoonerCare';
+  if (desc.includes('MEDICARE')) return 'Revenue: Medicare';
+  if (desc.includes('UNITED') || desc.includes('UHC')) return 'Revenue: Commercial - United Health';
+  if (desc.includes('AETNA') && !desc.includes('BETTER')) return 'Revenue: Commercial - Aetna';
+  if (desc.includes('CIGNA')) return 'Revenue: Commercial - Cigna';
+  if (desc.includes('HUMANA') && !desc.includes('HEALTHY')) return 'Revenue: Commercial - Humana';
+  
+  // Medicaid managed care
+  if (desc.includes('AETNA BETTER') || desc.includes('HNB')) return 'Revenue: Medicaid - Aetna Better Health';
+  if (desc.includes('OK CLAIMS') || desc.includes('OKLAHOMA COMPLETE')) return 'Revenue: Medicaid - Oklahoma Complete';
+  if (desc.includes('HUMANA HEALTHY') || desc.includes('HWHO')) return 'Revenue: Medicaid - Humana Healthy Horizons';
+  
+  // Default to generic insurance for any other insurance-looking payments
+  if (desc.includes('INSURANCE') || desc.includes('CLAIM') || desc.includes('REIMBURSE')) return 'Revenue: Insurance';
+  
+  // Default to Other Insurance for unidentified payments
+  return 'Revenue: Other Insurance';
+}
+
+// Helper function to check if a category is an equity/capital category
+function isEquityCategory(category) {
+  return customCategories.equity && customCategories.equity.includes(category);
+}
+
+// Helper function to check if a category is a liability/principal payment category
+function isLiabilityCategory(category) {
+  return customCategories.liability && customCategories.liability.includes(category);
+}
+
+// Create payer label from description
+function createPayerLabel(desc) {
+  const d = (desc || '').toUpperCase();
+  
+  // High priority vendor patterns
+  if (d.includes('ADP')) return 'ADP Payroll';
+  if (d.includes('TEBRA')) return 'Tebra'; // Will show as "Tebra Patient Payment" or "Tebra EMR" based on Credit/Debit
+  if (d.includes('S2')) return 'S2 Security';
+  if (d.includes('MCKESSON')) return 'McKesson Medical Supplies';
+  
+  // Common payer patterns
+  if (d.includes('BCBS')) return 'BCBS';
+  if (d.includes('UNITED')) return 'United Health';
+  if (d.includes('MEDICAID')) return 'Medicaid';
+  if (d.includes('MEDICARE')) return 'Medicare';
+  if (d.includes('PATIENT')) return 'Patient Payment';
+  if (d.includes('GLOBAL PAYMENTS')) return 'Global Payments';
+  if (d.includes('MOBILE DEPOSIT')) return 'Mobile Deposit';
+  if (d.includes('GUSTO')) return 'Gusto Payroll';
+  if (d.includes('PAYROLL')) return 'Payroll';
+  if (d.includes('RENT')) return 'Rent';
+  if (d.includes('MEDICAL SUP')) return 'Medical Supplies';
+  
+  // Check against shareholder names
+  for (const shareholder of settings.shareholders) {
+    if (d.includes(shareholder.name.toUpperCase())) {
+      return `${shareholder.name} Distribution`;
+    }
+  }
+  
+  // Default to first 20 chars
+  return desc.substring(0, 20) + (desc.length > 20 ? '...' : '');
+}
+
+// CSV Processing - More flexible format support
+async function processCSV(text){
+  return new Promise((resolve,reject)=>{
+    Papa.parse(text,{
+      header:true, dynamicTyping:false, skipEmptyLines:true,
+      complete:(res)=>{ if(res.errors?.length){console.warn(res.errors)} resolve(res.data); },
+      error:(err)=>reject(err)
+    });
+  });
+}
+
+// UPDATED DATA INGESTION FOR NEW CSV FORMAT
+function ingestData(rows){
+  const mapped = rows.map((row, idx)=>{
+    // NEW FORMAT: Account Name, Processed Date, Description, Check Number, Credit or Debit, Amount
+    const accountName = row['Account Name'] || '';
+    const date = parseDate(row['Processed Date']);
+    const description = row['Description'] || '';
+    const checkNumber = row['Check Number'] ? String(row['Check Number']) : '';
+    const creditOrDebit = (row['Credit or Debit'] || '').toUpperCase();
+    const amount = parseMoney(row['Amount']);
+    
+    // Determine type based on "Credit or Debit" column
+    let type = 'Credit';
+    if (creditOrDebit.includes('DEBIT') || creditOrDebit === 'D') {
+      type = 'Debit';
+    } else if (creditOrDebit.includes('CREDIT') || creditOrDebit === 'C') {
+      type = 'Credit';
+    }
+    
+    let expenseClass = null, revenueClass = null;
+    if (type==='Debit'){ 
+      expenseClass = classifyExpense({description, amount}); 
+    } else { 
+      revenueClass = classifyRevenue({description, amount, date}); 
+    }
+    
+    return {
+      id: `row-${idx}-${Date.now()}`, // Unique ID for tracking edits
+      accountName, // Store account name for display
+      date, 
+      description, 
+      checkNumber, 
+      type, 
+      amount, 
+      expenseClass, 
+      revenueClass,
+      originalExpenseClass: expenseClass, // Store original classification
+      originalRevenueClass: revenueClass,
+      isManuallyEdited: false
+    };
+  }).filter(r=>r.date && r.amount>0)
+    .sort((a,b)=>a.date.localeCompare(b.date));
+  
+  allRows = mapped;
+  
+  // Update account display pill if we have account names
+  const uniqueAccounts = [...new Set(mapped.map(r => r.accountName).filter(a => a))];
+  if (uniqueAccounts.length > 0) {
+    const accountText = uniqueAccounts.length === 1 ? uniqueAccounts[0] : `${uniqueAccounts.length} Accounts`;
+    document.getElementById('accountPill').textContent = `Account: ${accountText}`;
+  }
+  
+  document.getElementById('statusBox').style.display='block';
+  document.getElementById('statusMsg').textContent = ` • ${allRows.length} transactions loaded • ${settings.practiceName}`;
+  
+  const dates = [...new Set(allRows.map(r=>r.date))].sort();
+  if (dates.length){
+    document.getElementById('periodPill').textContent = `Data: ${dates[0]} - ${dates[dates.length-1]}`;
+  }
+  
+  // Show save button when data is loaded
+  document.getElementById('saveVersionBtn').style.display = 'inline-block';
+  document.getElementById('exportDataBtn').style.display = 'inline-block';
+  
+  currentVersionName = 'New Import';
+  dataModified = true;
+  updateVersionDisplay();
+}
+
+function filterToPeriod(){
+  let startDate = '', endDate = '';
+  
+  if (currentPeriodType === 'month') {
+    const monthKey = document.getElementById('periodPicker').value;
+    if (!monthKey) return;
+    startDate = monthKey + '-01';
+    const [year, month] = monthKey.split('-');
+    const lastDay = new Date(year, month, 0).getDate();
+    endDate = `${monthKey}-${lastDay}`;
+  } else if (currentPeriodType === 'quarter') {
+    const year = document.getElementById('yearPicker').value;
+    const quarter = document.getElementById('quarterPicker').value;
+    if (!year || !quarter) return;
+    const dates = getQuarterDates(year, quarter);
+    startDate = dates.start;
+    endDate = dates.end;
+  } else if (currentPeriodType === 'year') {
+    const year = document.getElementById('yearPicker').value;
+    if (!year) return;
+    startDate = `${year}-01-01`;
+    endDate = `${year}-12-31`;
+  } else if (currentPeriodType === 'ttm') {
+    const startMonth = document.getElementById('ttmStartMonth').value;
+    const endMonth = document.getElementById('ttmEndMonth').value;
+    if (!startMonth || !endMonth) return;
+    
+    // Start date is first day of start month
+    startDate = startMonth + '-01';
+    
+    // End date is last day of end month
+    const [endYear, endMonthNum] = endMonth.split('-');
+    const lastDay = new Date(endYear, endMonthNum, 0).getDate();
+    endDate = `${endMonth}-${lastDay}`;
+  }
+  
+  periodRows = allRows.filter(r => r.date >= startDate && r.date <= endDate);
+  filteredRows = [...periodRows];
+  
+  if (periodRows.length > 0) {
+    const dates = [...new Set(periodRows.map(r=>r.date))].sort();
+    const periodLabel = currentPeriodType === 'ttm' ? 'TTM' : 'Period';
+    document.getElementById('periodPill').textContent = `${periodLabel}: ${dates[0]} - ${dates[dates.length-1]}`;
+  }
+  
+  dataModified = true;
+  updateVersionDisplay();
+}
+
+// ENHANCED CHART BUILDING WITH ALL CHARTS INCLUDING SHAREHOLDER CHARTS
+function buildCharts(rows, beginBal){
+  destroyCharts();
+  
+  if (!rows || rows.length === 0) return;
+  
+  // Aggregate by day (EXCLUDE equity categories from revenue, liability payments from opEx)
+  const dayMap = {};
+  rows.forEach(r => {
+    if (!dayMap[r.date]) dayMap[r.date]={rev:0, opEx:0, distrib:0, capital:0, principal:0};
+    if (r.type==='Credit') {
+      if (isEquityCategory(r.revenueClass)) {
+        dayMap[r.date].capital += r.amount;
+      } else {
+        dayMap[r.date].rev += r.amount;
+      }
+    }
+    else if (r.expenseClass && r.expenseClass.startsWith('Distribution')) dayMap[r.date].distrib += r.amount;
+    else if (isLiabilityCategory(r.expenseClass)) dayMap[r.date].principal += r.amount;
+    else dayMap[r.date].opEx += r.amount;
+  });
+  
+  const dates = Object.keys(dayMap).sort();
+  if (dates.length === 0) return;
+  
+  // Build series
+  const revSeries = dates.map(d=>dayMap[d].rev);
+  const opExSeries = dates.map(d=>dayMap[d].opEx);
+  const distribSeries = dates.map(d=>dayMap[d].distrib);
+  
+  // Calculate cash balance series
+  let runningBalance = Number(beginBal || 0);
+  const balanceSeries = [];
+  let peakBal = runningBalance;
+  let peakDate = dates[0] || '—';
+  let lowestBal = runningBalance;
+  let lowestDate = dates[0] || '—';
+  
+  dates.forEach((d, i) => {
+    const dayChange = dayMap[d].rev + dayMap[d].capital - dayMap[d].opEx - dayMap[d].distrib - dayMap[d].principal;
+    runningBalance += dayChange;
+    balanceSeries.push(runningBalance);
+    
+    if (runningBalance > peakBal) {
+      peakBal = runningBalance;
+      peakDate = d;
+    }
+    if (runningBalance < lowestBal) {
+      lowestBal = runningBalance;
+      lowestDate = d;
+    }
+  });
+  
+  const avgBalance = balanceSeries.reduce((a,b)=>a+b,0) / (balanceSeries.length || 1);
+  
+  // Update cash balance stats
+  document.getElementById('startingBalance').textContent = fmt(Number(beginBal || 0));
+  document.getElementById('endingBalance').textContent = fmt(runningBalance);
+  document.getElementById('peakBalance').textContent = `${fmtCompact(peakBal)} (${peakDate})`;
+  document.getElementById('lowestBalance').textContent = `${fmtCompact(lowestBal)} (${lowestDate})`;
+  document.getElementById('avgBalance').textContent = fmtCompact(avgBalance);
+  
+  // 1. Cash Balance Chart - Fixed to properly render
+  const cashCanvasEl = document.getElementById('cashBalanceChart');
+  if (cashCanvasEl) {
+    charts.cashBalance = new Chart(cashCanvasEl, {
+      type:'line',
+      data:{
+        labels:dates,
+        datasets:[{
+          label:'Cash Balance',
+          data:balanceSeries,
+          borderColor:'#a855f7',
+          backgroundColor:'rgba(168,85,247,.1)',
+          borderWidth:2,
+          fill:true,
+          tension:0.2,
+          pointRadius:3,
+          pointHoverRadius:5
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        interaction:{mode:'index',intersect:false},
+        plugins:{
+          legend:{display:false},
+          tooltip:{
+            callbacks:{
+              label:function(context){
+                return 'Balance: ' + fmtCompact(context.parsed.y);
+              }
+            }
+          }
+        },
+        scales:{
+          y:{
+            beginAtZero:false,
+            title:{display:true,text:'Cash Balance ($)'},
+            ticks:{callback:(v)=>fmtCompact(v)}
+          }
+        }
+      }
+    });
+  }
+  
+  // Calculate deposit stats
+  const depositsWithValues = revSeries.filter(v => v > 0);
+  const avgDeposits = depositsWithValues.reduce((a,b)=>a+b,0) / (depositsWithValues.length || 1);
+  const totalDeposits = revSeries.reduce((a,b)=>a+b,0);
+  const depositDays = depositsWithValues.length;
+  
+  // Find peak deposit day
+  let maxRev=0, revDay='—';
+  dates.forEach((d,i)=>{
+    if (revSeries[i]>maxRev){maxRev=revSeries[i];revDay=d;}
+  });
+  
+  // Calculate volatility
+  const variance = depositsWithValues.reduce((s,x)=>s+Math.pow(x-avgDeposits,2),0)/(depositsWithValues.length||1);
+  const vol = Math.sqrt(variance);
+  const volatility = avgDeposits!==0? (vol/Math.abs(avgDeposits)*100):0;
+  
+  // Update stats
+  document.getElementById('peakDepositDay').textContent = revDay ? `${revDay} (${fmtCompact(maxRev)})` : '—';
+  document.getElementById('avgDailyDeposits').textContent = fmtCompact(avgDeposits);
+  document.getElementById('depositVolatility').textContent = volatility.toFixed(1)+'%';
+  document.getElementById('depositDays').textContent = depositDays;
+  document.getElementById('totalDeposits').textContent = fmtCompact(totalDeposits);
+  
+  // 2. Deposits Chart - Fixed to properly render
+  const depositsCanvasEl = document.getElementById('depositsChart');
+  if (depositsCanvasEl) {
+    charts.deposits = new Chart(depositsCanvasEl, {
+      type:'line',
+      data:{
+        labels:dates,
+        datasets:[{
+          label:'Daily Deposits',
+          data:revSeries,
+          borderColor:'#10b981',
+          backgroundColor:'rgba(16,185,129,.1)',
+          borderWidth:2,
+          fill:true,
+          tension:0.2,
+          pointRadius:3,
+          pointHoverRadius:5
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        interaction:{mode:'index',intersect:false},
+        plugins:{
+          legend:{display:false},
+          tooltip:{
+            callbacks:{
+              label:function(context){
+                return 'Deposits: ' + fmtCompact(context.parsed.y);
+              }
+            }
+          }
+        },
+        scales:{
+          y:{
+            beginAtZero:true,
+            title:{display:true,text:'Daily Deposits ($)'},
+            ticks:{callback:(v)=>fmtCompact(v)}
+          }
+        }
+      }
+    });
+  }
+  
+  // Continue with other charts - ensure all canvas elements exist
+  const revenueCanvasEl = document.getElementById('revenueChart');
+  if (revenueCanvasEl) {
+    charts.revenue = new Chart(revenueCanvasEl, {
+      type:'bar',
+      data:{
+        labels:dates,
+        datasets:[{
+          label:'Daily Revenue',
+          data:revSeries,
+          backgroundColor:'rgba(16,185,129,.6)',
+          borderColor:'#10b981',
+          borderWidth:1
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          tooltip:{
+            callbacks:{
+              label:function(context){
+                return 'Revenue: ' + fmtCompact(context.parsed.y);
+              }
+            }
+          }
+        },
+        scales:{
+          y:{
+            beginAtZero:true,
+            title:{display:true,text:'Revenue ($)'},
+            ticks:{callback:(v)=>fmtCompact(v)}
+          }
+        }
+      }
+    });
+  }
+  
+  const expenseCanvasEl = document.getElementById('expenseChart');
+  if (expenseCanvasEl) {
+    charts.expense = new Chart(expenseCanvasEl, {
+      type:'bar',
+      data:{
+        labels:dates,
+        datasets:[{
+          label:'Daily Expenses',
+          data:opExSeries,
+          backgroundColor:'rgba(239,68,68,.6)',
+          borderColor:'#ef4444',
+          borderWidth:1
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          tooltip:{
+            callbacks:{
+              label:function(context){
+                return 'Expenses: ' + fmtCompact(context.parsed.y);
+              }
+            }
+          }
+        },
+        scales:{
+          y:{
+            beginAtZero:true,
+            title:{display:true,text:'Expenses ($)'},
+            ticks:{callback:(v)=>fmtCompact(v)}
+          }
+        }
+      }
+    });
+  }
+  
+  // Revenue Mix Chart
+  const revenueTotals = {
+    'Patient': 0,
+    'Medicaid': 0,
+    'Commercial': 0,
+    'Medicare': 0,
+    'Other': 0
+  };
+  
+  rows.filter(r => r.type === 'Credit').forEach(r => {
+    if (r.revenueClass === 'Revenue: Patient') {
+      revenueTotals['Patient'] += r.amount;
+    } else if (r.revenueClass && r.revenueClass.includes('Medicaid')) {
+      revenueTotals['Medicaid'] += r.amount;
+    } else if (r.revenueClass && r.revenueClass.includes('Commercial')) {
+      revenueTotals['Commercial'] += r.amount;
+    } else if (r.revenueClass && r.revenueClass.includes('Medicare')) {
+      revenueTotals['Medicare'] += r.amount;
+    } else {
+      revenueTotals['Other'] += r.amount;
+    }
+  });
+  
+  const revMixLabels = Object.keys(revenueTotals).filter(k => revenueTotals[k] > 0);
+  const revMixData = revMixLabels.map(k => revenueTotals[k]);
+  const revMixColors = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444'];
+  
+  const revMixCanvasEl = document.getElementById('revMixChart');
+  if (revMixCanvasEl && revMixLabels.length > 0) {
+    charts.revMix = new Chart(revMixCanvasEl, {
+      type:'doughnut',
+      data:{
+        labels: revMixLabels,
+        datasets:[{
+          data: revMixData,
+          backgroundColor: revMixColors.slice(0, revMixLabels.length),
+          borderWidth: 2,
+          borderColor: '#0f172a'
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{
+          legend:{
+            position: 'bottom',
+            labels: {
+              font: { size: 11 },
+              generateLabels: function(chart) {
+                const data = chart.data;
+                return data.labels.map((label, i) => ({
+                  text: `${label}: ${fmtCompact(data.datasets[0].data[i])}`,
+                  fillStyle: data.datasets[0].backgroundColor[i]
+                }));
+              }
+            }
+          },
+          tooltip:{
+            callbacks:{
+              label:function(context){
+                const total = context.dataset.data.reduce((a,b)=>a+b,0);
+                const percent = ((context.parsed / total) * 100).toFixed(1);
+                return `${context.label}: ${fmtCompact(context.parsed)} (${percent}%)`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+  
+  // Insurance Payer Breakdown Chart
+  const payerTotals = {};
+  rows.filter(r => r.type === 'Credit' && r.revenueClass && !r.revenueClass.includes('Patient')).forEach(r => {
+    const payer = r.revenueClass.replace('Revenue: ', '');
+    payerTotals[payer] = (payerTotals[payer] || 0) + r.amount;
+  });
+  
+  const payerLabels = Object.keys(payerTotals);
+  const payerData = payerLabels.map(k => payerTotals[k]);
+  
+  const payerCanvasEl = document.getElementById('payerBreakdownChart');
+  if (payerCanvasEl && payerLabels.length > 0) {
+    charts.payerBreakdown = new Chart(payerCanvasEl, {
+      type:'pie',
+      data:{
+        labels: payerLabels,
+        datasets:[{
+          data: payerData,
+          backgroundColor: [
+            '#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', 
+            '#ef4444', '#06b6d4', '#84cc16', '#f97316'
+          ],
+          borderWidth: 2,
+          borderColor: '#0f172a'
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{
+          legend:{
+            position: 'bottom',
+            labels: { font: { size: 10 } }
+          },
+          tooltip:{
+            callbacks:{
+              label:function(context){
+                return `${context.label}: ${fmtCompact(context.parsed)}`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+  
+  // Top Individual Payers Chart
+  const topPayersData = Object.entries(payerTotals)
+    .sort((a,b) => b[1] - a[1])
+    .slice(0, 8);
+  
+  const topPayersCanvasEl = document.getElementById('topPayersChart');
+  if (topPayersCanvasEl && topPayersData.length > 0) {
+    charts.topPayers = new Chart(topPayersCanvasEl, {
+      type:'bar',
+      data:{
+        labels: topPayersData.map(p => p[0].replace(/^(Commercial|Medicaid) - /, '')),
+        datasets:[{
+          label:'Revenue',
+          data: topPayersData.map(p => p[1]),
+          backgroundColor:'rgba(31,122,140,.6)',
+          borderColor:'#1f7a8c',
+          borderWidth:1
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        indexAxis: 'y',
+        plugins:{
+          legend:{display:false},
+          tooltip:{
+            callbacks:{
+              label:function(context){
+                return fmtCompact(context.parsed.x);
+              }
+            }
+          }
+        },
+        scales:{
+          x:{
+            beginAtZero:true,
+            ticks:{callback:(v)=>fmtCompact(v)}
+          }
+        }
+      }
+    });
+  }
+  
+  // Expense Categories Chart
+  const expenseTotals = {
+    'Payroll': 0,
+    'Rent': 0,
+    'Professional Fees': 0,
+    'Medical Supplies': 0,
+    'Supervising Physician Fees': 0,
+    'CAM Services': 0,
+    'Vaccines and Immunizations': 0,
+    'Insurance Premiums': 0,
+    'Laboratory Services': 0,
+    'Equipment Maintenance': 0,
+    'Continuing Education': 0,
+    'Other OpEx': 0
+  };
+  
+  rows.filter(r => r.type === 'Debit' && !r.expenseClass.startsWith('Distribution')).forEach(r => {
+    if (expenseTotals.hasOwnProperty(r.expenseClass)) {
+      expenseTotals[r.expenseClass] += r.amount;
+    } else {
+      expenseTotals['Other OpEx'] += r.amount;
+    }
+  });
+  
+  const expenseLabels = Object.keys(expenseTotals).filter(k => expenseTotals[k] > 0);
+  const expenseData = expenseLabels.map(k => expenseTotals[k]);
+  
+  const expensePieCanvasEl = document.getElementById('expensePie');
+  if (expensePieCanvasEl && expenseLabels.length > 0) {
+    charts.expensePie = new Chart(expensePieCanvasEl, {
+      type:'doughnut',
+      data:{
+        labels: expenseLabels,
+        datasets:[{
+          data: expenseData,
+          backgroundColor: [
+            '#ef4444', '#f59e0b', '#8b5cf6', '#06b6d4', '#84cc16',
+            '#f97316', '#ec4899', '#14b8a6', '#a855f7', '#6366f1',
+            '#10b981', '#f43f5e'
+          ],
+          borderWidth: 2,
+          borderColor: '#0f172a'
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{
+          legend:{
+            position: 'bottom',
+            labels: {
+              font: { size: 11 },
+              generateLabels: function(chart) {
+                const data = chart.data;
+                return data.labels.map((label, i) => ({
+                  text: `${label}: ${fmtCompact(data.datasets[0].data[i])}`,
+                  fillStyle: data.datasets[0].backgroundColor[i]
+                }));
+              }
+            }
+          },
+          tooltip:{
+            callbacks:{
+              label:function(context){
+                const total = context.dataset.data.reduce((a,b)=>a+b,0);
+                const percent = ((context.parsed / total) * 100).toFixed(1);
+                return `${context.label}: ${fmtCompact(context.parsed)} (${percent}%)`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+  
+  // Medicaid Chart
+  const medicaidTotals = {};
+  rows.filter(r => r.type === 'Credit' && r.revenueClass && r.revenueClass.includes('Medicaid')).forEach(r => {
+    const payer = r.revenueClass.replace('Revenue: Medicaid - ', '');
+    medicaidTotals[payer] = (medicaidTotals[payer] || 0) + r.amount;
+  });
+  
+  const medicaidLabels = Object.keys(medicaidTotals);
+  const medicaidData = medicaidLabels.map(k => medicaidTotals[k]);
+  
+  const medicaidCanvasEl = document.getElementById('medicaidChart');
+  if (medicaidCanvasEl && medicaidLabels.length > 0) {
+    charts.medicaid = new Chart(medicaidCanvasEl, {
+      type:'bar',
+      data:{
+        labels: medicaidLabels,
+        datasets:[{
+          label:'Medicaid Revenue',
+          data: medicaidData,
+          backgroundColor:'rgba(59,130,246,.6)',
+          borderColor:'#3b82f6',
+          borderWidth:1
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          title:{
+            display:true,
+            text:'Medicaid Payers'
+          },
+          tooltip:{
+            callbacks:{
+              label:function(context){
+                return fmtCompact(context.parsed.y);
+              }
+            }
+          }
+        },
+        scales:{
+          y:{
+            beginAtZero:true,
+            ticks:{callback:(v)=>fmtCompact(v)}
+          }
+        }
+      }
+    });
+  }
+  
+  // Commercial Chart
+  const commercialTotals = {};
+  rows.filter(r => r.type === 'Credit' && r.revenueClass && r.revenueClass.includes('Commercial')).forEach(r => {
+    const payer = r.revenueClass.replace('Revenue: Commercial - ', '');
+    commercialTotals[payer] = (commercialTotals[payer] || 0) + r.amount;
+  });
+  
+  const commercialLabels = Object.keys(commercialTotals);
+  const commercialData = commercialLabels.map(k => commercialTotals[k]);
+  
+  const commercialCanvasEl = document.getElementById('commercialChart');
+  if (commercialCanvasEl && commercialLabels.length > 0) {
+    charts.commercial = new Chart(commercialCanvasEl, {
+      type:'bar',
+      data:{
+        labels: commercialLabels,
+        datasets:[{
+          label:'Commercial Revenue',
+          data: commercialData,
+          backgroundColor:'rgba(139,92,246,.6)',
+          borderColor:'#8b5cf6',
+          borderWidth:1
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          title:{
+            display:true,
+            text:'Commercial Payers'
+          },
+          tooltip:{
+            callbacks:{
+              label:function(context){
+                return fmtCompact(context.parsed.y);
+              }
+            }
+          }
+        },
+        scales:{
+          y:{
+            beginAtZero:true,
+            ticks:{callback:(v)=>fmtCompact(v)}
+          }
+        }
+      }
+    });
+  }
+  
+  // Weekly Revenue Pattern Chart
+  const weeklyTotals = {};
+  rows.filter(r => r.type === 'Credit').forEach(r => {
+    const dow = getDOW(r.date);
+    weeklyTotals[dow] = (weeklyTotals[dow] || 0) + r.amount;
+  });
+  
+  const dayOrder = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const weeklyLabels = dayOrder.filter(d => weeklyTotals[d] > 0);
+  const weeklyData = weeklyLabels.map(d => weeklyTotals[d]);
+  
+  const weeklyCanvasEl = document.getElementById('weeklyChart');
+  if (weeklyCanvasEl && weeklyLabels.length > 0) {
+    charts.weekly = new Chart(weeklyCanvasEl, {
+      type:'bar',
+      data:{
+        labels: weeklyLabels,
+        datasets:[{
+          label:'Revenue by Day',
+          data: weeklyData,
+          backgroundColor:'rgba(16,185,129,.6)',
+          borderColor:'#10b981',
+          borderWidth:1
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          tooltip:{
+            callbacks:{
+              label:function(context){
+                return fmtCompact(context.parsed.y);
+              }
+            }
+          }
+        },
+        scales:{
+          y:{
+            beginAtZero:true,
+            ticks:{callback:(v)=>fmtCompact(v)}
+          }
+        }
+      }
+    });
+  }
+  
+  // Monthly Trend Chart
+  const monthlyTotals = {};
+  rows.forEach(r => {
+    const monthKey = r.date.substring(0, 7); // YYYY-MM
+    if (!monthlyTotals[monthKey]) {
+      monthlyTotals[monthKey] = {revenue: 0, expenses: 0};
+    }
+    if (r.type === 'Credit') {
+      monthlyTotals[monthKey].revenue += r.amount;
+    } else if (!r.expenseClass.startsWith('Distribution')) {
+      monthlyTotals[monthKey].expenses += r.amount;
+    }
+  });
+  
+  const monthlyLabels = Object.keys(monthlyTotals).sort();
+  const monthlyRevData = monthlyLabels.map(m => monthlyTotals[m].revenue);
+  const monthlyExpData = monthlyLabels.map(m => monthlyTotals[m].expenses);
+  
+  const monthlyTrendCanvasEl = document.getElementById('monthlyTrendChart');
+  if (monthlyTrendCanvasEl && monthlyLabels.length > 0) {
+    charts.monthlyTrend = new Chart(monthlyTrendCanvasEl, {
+      type:'line',
+      data:{
+        labels: monthlyLabels.map(m => {
+          const [year, month] = m.split('-');
+          return getMonthName(parseInt(month)) + ' ' + year;
+        }),
+        datasets:[
+          {
+            label:'Revenue',
+            data: monthlyRevData,
+            borderColor:'#10b981',
+            backgroundColor:'rgba(16,185,129,.1)',
+            borderWidth:2,
+            tension:0.2
+          },
+          {
+            label:'Expenses',
+            data: monthlyExpData,
+            borderColor:'#ef4444',
+            backgroundColor:'rgba(239,68,68,.1)',
+            borderWidth:2,
+            tension:0.2
+          }
+        ]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        interaction:{mode:'index',intersect:false},
+        plugins:{
+          legend:{
+            position:'top'
+          },
+          tooltip:{
+            callbacks:{
+              label:function(context){
+                return `${context.dataset.label}: ${fmtCompact(context.parsed.y)}`;
+              }
+            }
+          }
+        },
+        scales:{
+          y:{
+            beginAtZero:true,
+            ticks:{callback:(v)=>fmtCompact(v)}
+          }
+        }
+      }
+    });
+  }
+  
+  // Update payer analysis stats
+  const totalInsurance = Object.values(payerTotals).reduce((a,b)=>a+b,0);
+  const medicaidTotal = Object.values(medicaidTotals).reduce((a,b)=>a+b,0);
+  const commercialTotal = Object.values(commercialTotals).reduce((a,b)=>a+b,0);
+  
+  document.getElementById('medicaidPercent').textContent = totalInsurance > 0 ? ((medicaidTotal/totalInsurance)*100).toFixed(1) + '%' : '0%';
+  document.getElementById('commercialPercent').textContent = totalInsurance > 0 ? ((commercialTotal/totalInsurance)*100).toFixed(1) + '%' : '0%';
+  
+  const topMedicaid = Object.entries(medicaidTotals).sort((a,b)=>b[1]-a[1])[0];
+  const topCommercial = Object.entries(commercialTotals).sort((a,b)=>b[1]-a[1])[0];
+  
+  document.getElementById('topMedicaid').textContent = topMedicaid ? topMedicaid[0] : '—';
+  document.getElementById('topCommercial').textContent = topCommercial ? topCommercial[0] : '—';
+  
+  // Calculate other revenue (non-insurance, non-patient)
+  const otherRevenue = rows.filter(r => 
+    r.type === 'Credit' && 
+    r.revenueClass && 
+    !r.revenueClass.includes('Patient') &&
+    !r.revenueClass.includes('Medicaid') &&
+    !r.revenueClass.includes('Commercial') &&
+    !r.revenueClass.includes('Medicare')
+  ).reduce((sum, r) => sum + r.amount, 0);
+  
+  document.getElementById('otherRevenue').textContent = fmtCompact(otherRevenue);
+}
+
+// Enhanced shareholder analysis
+function buildShareholderAnalysis(rows) {
+  if (!rows || rows.length === 0) return;
+  
+  // Calculate total distributions by type
+  const distributionTotals = {};
+  let totalDistributions = 0;
+  
+  rows.filter(r => r.type === 'Debit' && r.expenseClass.startsWith('Distribution')).forEach(r => {
+    const category = r.expenseClass;
+    distributionTotals[category] = (distributionTotals[category] || 0) + r.amount;
+    totalDistributions += r.amount;
+  });
+  
+  // Calculate period net income (EXCLUDE equity categories from revenue, liability payments from expenses)
+  const totalRevenue = rows.filter(r => r.type === 'Credit' && !isEquityCategory(r.revenueClass)).reduce((sum, r) => sum + r.amount, 0);
+  const totalExpenses = rows.filter(r => r.type === 'Debit' && !r.expenseClass.startsWith('Distribution') && !isLiabilityCategory(r.expenseClass)).reduce((sum, r) => sum + r.amount, 0);
+  const netIncome = totalRevenue - totalExpenses;
+  const distributionRate = netIncome > 0 ? (totalDistributions / netIncome * 100) : 0;
+  const retainedEarnings = netIncome - totalDistributions;
+  
+  // Update shareholder KPIs
+  document.getElementById('shareholderTotalDist').textContent = fmt(totalDistributions);
+  document.getElementById('shareholderCount').textContent = settings.shareholders.length;
+  document.getElementById('shareholderAvgDist').textContent = fmt(totalDistributions / settings.shareholders.length);
+  document.getElementById('shareholderDistRate').textContent = distributionRate.toFixed(1) + '%';
+  document.getElementById('shareholderRetained').textContent = fmt(retainedEarnings);
+  
+  // Calculate monthly average
+  const uniqueMonths = new Set(rows.map(r => r.date.substring(0, 7))).size;
+  const monthlyAvg = uniqueMonths > 0 ? totalDistributions / uniqueMonths : 0;
+  document.getElementById('shareholderMonthlyAvg').textContent = fmt(monthlyAvg);
+  
+  // Build monthly distribution table
+  buildShareholderTable(rows);
+  buildShareholderCharts(rows);
+}
+
+function buildShareholderTable(rows) {
+  // Get unique months
+  const monthsSet = new Set();
+  rows.forEach(row => {
+    if (row.date && row.type === 'Debit' && row.expenseClass.startsWith('Distribution')) {
+      const monthKey = row.date.substring(0, 7);
+      monthsSet.add(monthKey);
+    }
+  });
+  
+  const months = Array.from(monthsSet).sort();
+  if (months.length === 0) return;
+  
+  // Build table headers
+  const headerRow = document.getElementById('shareholderHeaders');
+  headerRow.innerHTML = '<th>Month</th>';
+  settings.shareholders.forEach(shareholder => {
+    headerRow.innerHTML += `<th>${shareholder.name}</th>`;
+  });
+  headerRow.innerHTML += '<th>Total</th>';
+  
+  // Calculate monthly distributions
+  const monthlyData = {};
+  months.forEach(month => {
+    monthlyData[month] = {};
+    settings.shareholders.forEach(shareholder => {
+      monthlyData[month][shareholder.name] = 0;
+    });
+    monthlyData[month].total = 0;
+  });
+  
+  // Aggregate distributions by month and shareholder
+  rows.filter(r => r.type === 'Debit' && r.expenseClass.startsWith('Distribution')).forEach(row => {
+    const month = row.date.substring(0, 7);
+    if (monthlyData[month]) {
+      if (row.expenseClass.includes(' - ')) {
+        // Assigned distribution
+        const shareholderName = row.expenseClass.replace('Distribution - ', '');
+        if (monthlyData[month][shareholderName] !== undefined) {
+          monthlyData[month][shareholderName] += row.amount;
+        }
+      } else {
+        // Unassigned distribution - distribute proportionally
+        settings.shareholders.forEach(shareholder => {
+          const allocation = row.amount * (shareholder.percentage / 100);
+          monthlyData[month][shareholder.name] += allocation;
+        });
+      }
+      monthlyData[month].total += row.amount;
+    }
+  });
+  
+  // Build table body
+  const tbody = document.getElementById('shareholderTableBody');
+  tbody.innerHTML = '';
+  
+  months.forEach(month => {
+    const [year, monthNum] = month.split('-');
+    const monthName = getMonthName(parseInt(monthNum));
+    
+    let row = `<tr><td>${monthName} ${year}</td>`;
+    settings.shareholders.forEach(shareholder => {
+      row += `<td class="right">${fmt(monthlyData[month][shareholder.name])}</td>`;
+    });
+    row += `<td class="right total-row">${fmt(monthlyData[month].total)}</td></tr>`;
+    tbody.innerHTML += row;
+  });
+  
+  // Add totals row
+  let totalsRow = '<tr class="total-row"><td><strong>Total</strong></td>';
+  settings.shareholders.forEach(shareholder => {
+    const total = months.reduce((sum, month) => sum + monthlyData[month][shareholder.name], 0);
+    totalsRow += `<td class="right"><strong>${fmt(total)}</strong></td>`;
+  });
+  const grandTotal = months.reduce((sum, month) => sum + monthlyData[month].total, 0);
+  totalsRow += `<td class="right"><strong>${fmt(grandTotal)}</strong></td></tr>`;
+  tbody.innerHTML += totalsRow;
+}
+
+function buildShareholderCharts(rows) {
+  // Shareholder distribution pie chart
+  const shareholderTotals = {};
+  settings.shareholders.forEach(sh => shareholderTotals[sh.name] = 0);
+  
+  rows.filter(r => r.type === 'Debit' && r.expenseClass.startsWith('Distribution')).forEach(row => {
+    if (row.expenseClass.includes(' - ')) {
+      const shareholderName = row.expenseClass.replace('Distribution - ', '');
+      if (shareholderTotals[shareholderName] !== undefined) {
+        shareholderTotals[shareholderName] += row.amount;
+      }
+    } else {
+      // Distribute unassigned proportionally
+      settings.shareholders.forEach(shareholder => {
+        const allocation = row.amount * (shareholder.percentage / 100);
+        shareholderTotals[shareholder.name] += allocation;
+      });
+    }
+  });
+  
+  const pieLabels = Object.keys(shareholderTotals).filter(k => shareholderTotals[k] > 0);
+  const pieData = pieLabels.map(k => shareholderTotals[k]);
+  const pieColors = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4'];
+  
+  const pieCanvasEl = document.getElementById('shareholderPieChart');
+  if (pieCanvasEl && pieLabels.length > 0) {
+    charts.shareholderPie = new Chart(pieCanvasEl, {
+      type:'pie',
+      data:{
+        labels: pieLabels,
+        datasets:[{
+          data: pieData,
+          backgroundColor: pieColors.slice(0, pieLabels.length),
+          borderWidth: 2,
+          borderColor: '#0f172a'
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{
+          legend:{
+            position: 'bottom',
+            labels: {
+              font: { size: 11 },
+              generateLabels: function(chart) {
+                const data = chart.data;
+                return data.labels.map((label, i) => ({
+                  text: `${label}: ${fmtCompact(data.datasets[0].data[i])}`,
+                  fillStyle: data.datasets[0].backgroundColor[i]
+                }));
+              }
+            }
+          },
+          title:{
+            display: true,
+            text: 'Distribution by Shareholder'
+          },
+          tooltip:{
+            callbacks:{
+              label:function(context){
+                const total = context.dataset.data.reduce((a,b)=>a+b,0);
+                const percent = ((context.parsed / total) * 100).toFixed(1);
+                return `${context.label}: ${fmtCompact(context.parsed)} (${percent}%)`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+  
+  // Monthly distribution trend chart
+  const monthsSet = new Set();
+  rows.forEach(row => {
+    if (row.date && row.type === 'Debit' && row.expenseClass.startsWith('Distribution')) {
+      const monthKey = row.date.substring(0, 7);
+      monthsSet.add(monthKey);
+    }
+  });
+  
+  const months = Array.from(monthsSet).sort();
+  const monthlyTotals = {};
+  
+  months.forEach(month => {
+    monthlyTotals[month] = 0;
+  });
+  
+  rows.filter(r => r.type === 'Debit' && r.expenseClass.startsWith('Distribution')).forEach(row => {
+    const month = row.date.substring(0, 7);
+    if (monthlyTotals[month] !== undefined) {
+      monthlyTotals[month] += row.amount;
+    }
+  });
+  
+  const trendLabels = months.map(m => {
+    const [year, monthNum] = m.split('-');
+    return getMonthName(parseInt(monthNum)) + ' ' + year;
+  });
+  const trendData = months.map(m => monthlyTotals[m]);
+  
+  const trendCanvasEl = document.getElementById('shareholderTrendChart');
+  if (trendCanvasEl && months.length > 0) {
+    charts.shareholderTrend = new Chart(trendCanvasEl, {
+      type:'line',
+      data:{
+        labels: trendLabels,
+        datasets:[{
+          label:'Monthly Distributions',
+          data: trendData,
+          borderColor:'#8b5cf6',
+          backgroundColor:'rgba(139,92,246,.1)',
+          borderWidth:2,
+          fill:true,
+          tension:0.2,
+          pointRadius:4,
+          pointHoverRadius:6
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          title:{
+            display: true,
+            text: 'Monthly Distribution Trend'
+          },
+          tooltip:{
+            callbacks:{
+              label:function(context){
+                return 'Distributions: ' + fmtCompact(context.parsed.y);
+              }
+            }
+          }
+        },
+        scales:{
+          y:{
+            beginAtZero:true,
+            title:{display:true,text:'Distributions ($)'},
+            ticks:{callback:(v)=>fmtCompact(v)}
+          }
+        }
+      }
+    });
+  }
+}
+
+// Compute KPIs
+function computeKPIs(rows, beginBal){
+  const credits = rows.filter(r => r.type==='Credit');
+  const debits = rows.filter(r => r.type==='Debit');
+  const opEx = debits.filter(r => !r.expenseClass.startsWith('Distribution') && !isLiabilityCategory(r.expenseClass));
+  
+  let patient=0, medicaid=0, commercial=0, medicare=0, otherIns=0;
+  credits.forEach(r => {
+    // Only count as revenue if not an equity category
+    if (isEquityCategory(r.revenueClass)) {
+      return; // Skip equity categories
+    }
+    if (r.revenueClass==='Revenue: Patient') {
+      patient += r.amount;
+    } else if (r.revenueClass && r.revenueClass.includes('Medicaid')) {
+      medicaid += r.amount;
+    } else if (r.revenueClass && r.revenueClass.includes('Commercial')) {
+      commercial += r.amount;
+    } else if (r.revenueClass && r.revenueClass.includes('Medicare')) {
+      medicare += r.amount;
+    } else {
+      otherIns += r.amount;
+    }
+  });
+  
+  const totalRev = patient + medicaid + commercial + medicare + otherIns;
+  const totalInsurance = medicaid + commercial + medicare + otherIns;
+  const totalOpEx = opEx.reduce((s,r)=>s+r.amount,0);
+  const netIncome = totalRev - totalOpEx;
+  const margin = totalRev > 0 ? (netIncome / totalRev * 100) : 0;
+  const distributions = debits.filter(r => r.expenseClass.startsWith('Distribution')).reduce((s,r)=>s+r.amount,0);
+  const principalPayments = debits.filter(r => isLiabilityCategory(r.expenseClass)).reduce((s,r)=>s+r.amount,0);
+  const capitalInjections = credits.filter(r => isEquityCategory(r.revenueClass)).reduce((s,r)=>s+r.amount,0);
+  const endingCash = Number(beginBal || 0) + totalRev + capitalInjections - totalOpEx - distributions - principalPayments;
+  
+  // Update KPIs
+  document.getElementById('kpiRevenue').textContent = fmt(totalRev);
+  
+  // Create detailed breakdown
+  let breakdown = [];
+  if (patient > 0) breakdown.push(`Patient: ${fmtCompact(patient)}`);
+  if (medicaid > 0) breakdown.push(`Medicaid: ${fmtCompact(medicaid)}`);
+  if (commercial > 0) breakdown.push(`Commercial: ${fmtCompact(commercial)}`);
+  
+  document.getElementById('kpiRevBreak').textContent = breakdown.slice(0,3).join(' • ');
+  document.getElementById('kpiOpEx').textContent = fmt(totalOpEx);
+  document.getElementById('kpiOpExCount').textContent = `${opEx.length} transactions`;
+  document.getElementById('kpiNet').textContent = fmt(netIncome);
+  document.getElementById('kpiMargin').textContent = margin.toFixed(1) + '%';
+  document.getElementById('kpiDistributions').textContent = fmt(distributions);
+  document.getElementById('kpiDistributionsCount').textContent = `${debits.filter(r => r.expenseClass.startsWith('Distribution')).length} transactions`;
+  document.getElementById('kpiEndingCash').textContent = fmt(endingCash);
+  
+  // Analytics KPIs
+  const uniqueDays = new Set(rows.map(r => r.date)).size || 1;
+  const revPerDay = totalRev / uniqueDays;
+  const opExPerDay = totalOpEx / uniqueDays;
+  const daysCash = opExPerDay > 0 ? Math.floor(endingCash / opExPerDay) : 999;
+  const patientMix = totalRev > 0 ? (patient/totalRev*100) : 0;
+  
+  document.getElementById('kpiRevPerDay').textContent = fmtCompact(revPerDay);
+  document.getElementById('kpiDaysCash').textContent = daysCash > 999 ? '999+' : daysCash;
+  document.getElementById('kpiPatientMix').textContent = patientMix.toFixed(1) + '%';
+  
+  // Payer concentration - now looking at top 3 insurance payers specifically
+  const payerTotals = {};
+  credits.forEach(r => {
+    if (r.revenueClass && !r.revenueClass.includes('Patient')) {
+      const payer = r.revenueClass;
+      payerTotals[payer] = (payerTotals[payer] || 0) + r.amount;
+    }
+  });
+  const sortedPayers = Object.entries(payerTotals).sort((a,b) => b[1] - a[1]);
+  const top3Revenue = sortedPayers.slice(0,3).reduce((sum, [,amt]) => sum + amt, 0);
+  const concentration = totalInsurance > 0 ? (top3Revenue / totalInsurance * 100) : 0;
+  document.getElementById('kpiPayerConc').textContent = concentration.toFixed(1) + '%';
+}
+
+// UPDATED render table with account name column
+function renderTable(rows, beginBal){
+  const tbody = document.querySelector('#txnTable tbody');
+  tbody.innerHTML='';
+  let runningNet = 0;
+  let monthlyNet = 0;
+  let currentMonth = '';
+  let cashBal = Number(beginBal||0);
+  
+  rows.forEach((r, index)=>{
+    // Check if we've moved to a new month
+    const transactionMonth = r.date.substring(0, 7); // YYYY-MM format
+    if (transactionMonth !== currentMonth) {
+      currentMonth = transactionMonth;
+      monthlyNet = 0; // Reset monthly total for new month
+    }
+    
+    // Calculate running totals
+    if (r.type==='Credit'){ 
+      runningNet += r.amount; 
+      monthlyNet += r.amount;
+      cashBal += r.amount; 
+    } else {
+      if (r.expenseClass.startsWith('Distribution')){ 
+        cashBal -= r.amount; 
+        // Distributions don't affect net income
+      } else { 
+        runningNet -= r.amount; 
+        monthlyNet -= r.amount;
+        cashBal -= r.amount; 
+      }
+    }
+    
+    let cat = r.type==='Credit' ? r.revenueClass : r.expenseClass;
+    
+    const tagCls = r.type==='Credit' ? 'tag credit' : (r.expenseClass.startsWith('Distribution')?'tag dist':'tag debit');
+    
+    // Create shortened description with expandable full text
+    const fullDesc = r.description;
+    const shortLabel = createPayerLabel(fullDesc);
+    const needsExpand = fullDesc.length > 30;
+    
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.date}</td>
+      <td>${r.accountName || '—'}</td>
+      <td class="left desc-cell">
+        <span class="desc-short" data-full="${fullDesc.replace(/"/g, '&quot;')}">${shortLabel}</span>
+        ${needsExpand ? '<span class="desc-expand" onclick="toggleDescription(this)">▼</span>' : ''}
+        <div class="desc-full">
+          <span class="desc-close" onclick="closeDescription(this)">×</span>
+          <div class="desc-full-text">${fullDesc}</div>
+        </div>
+      </td>
+      <td>${r.checkNumber || '—'}</td>
+      <td style="min-width:280px">
+        <select class="cat-select" data-row-id="${r.id}" data-type="${r.type}" 
+          style="background:${r.isManuallyEdited ? '#1e293b' : '#0b1220'};color:${r.isManuallyEdited ? '#10b981' : 'var(--ink)'};border:1px solid ${r.isManuallyEdited ? '#10b981' : '#1f2937'};border-radius:6px;padding:4px;font-size:12px;width:100%"
+          title="${r.isManuallyEdited ? 'Manually edited - Original: ' + (r.type === 'Credit' ? r.originalRevenueClass : r.originalExpenseClass) : 'Auto-categorized'}">
+          ${generateCategoryOptions(r.type, cat)}
+        </select>
+      </td>
+      <td><span class="${tagCls}">${r.type}</span></td>
+      <td class="right">${r.type==='Debit'?fmt(r.amount):''}</td>
+      <td class="right">${r.type==='Credit'?fmt(r.amount):''}</td>
+      <td class="right" style="font-weight:800">${fmt(runningNet)}</td>
+      <td class="right" style="font-weight:800;color:${monthlyNet >= 0 ? 'var(--success)' : 'var(--danger)'}">${fmt(monthlyNet)}</td>
+      <td class="right" style="font-weight:800">${fmt(cashBal)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+  
+  // Add event listeners for category changes
+  document.querySelectorAll('.cat-select').forEach(select => {
+    select.addEventListener('change', function(e) {
+      const rowId = this.dataset.rowId;
+      const type = this.dataset.type;
+      const newCat = this.value;
+      
+      // Update the row in allRows, periodRows, and filteredRows
+      [allRows, periodRows, filteredRows].forEach(rowArray => {
+        const row = rowArray.find(r => r.id === rowId);
+        if (row) {
+          if (type === 'Credit') {
+            row.revenueClass = newCat;
+            row.isManuallyEdited = (newCat !== row.originalRevenueClass);
+          } else {
+            row.expenseClass = newCat;
+            row.isManuallyEdited = (newCat !== row.originalExpenseClass);
+          }
+        }
+      });
+      
+      // Mark as modified
+      dataModified = true;
+      updateVersionDisplay();
+      
+      // Refresh everything with the updated data
+      const beginBal = Number(document.getElementById('beginBal').value || 0);
+      
+      // IMPORTANT: Use periodRows for KPIs and statements to ensure consistency
+      computeKPIs(periodRows, beginBal);
+      buildCharts(periodRows, beginBal);
+      buildMonthlyIncomeStatement(allRows);
+      buildProfessionalStatements(periodRows);
+      
+      // Re-render the table with filtered data
+      renderTable(filteredRows, beginBal);
+    });
+  });
+  
+  document.getElementById('filteredCount').textContent = rows.length;
+  document.getElementById('totalCount').textContent = periodRows.length;
+  const net = rows.reduce((s,r)=>{
+    if (r.type==='Credit') return s + r.amount;
+    if (!r.expenseClass.startsWith('Distribution')) return s - r.amount;
+    return s;
+  },0);
+  
+  document.getElementById('filteredTotal').textContent = `Net Income: ${fmt(net)}`;
+}
+
+function generateCategoryOptions(type, selectedCategory) {
+  let options = '';
+  
+  if (type === 'Credit') {
+    // Add revenue categories
+    customCategories.revenue.forEach(cat => {
+      const selected = cat === selectedCategory ? 'selected' : '';
+      const displayName = cat.replace('Revenue: ', '');
+      options += `<option value="${cat}" ${selected}>${displayName}</option>`;
+    });
+    
+    // Add equity categories separator and options
+    if (customCategories.equity && customCategories.equity.length > 0) {
+      options += '<option disabled>──────────</option>';
+      customCategories.equity.forEach(cat => {
+        const selected = cat === selectedCategory ? 'selected' : '';
+        options += `<option value="${cat}" ${selected}>${cat}</option>`;
+      });
+    }
+  } else {
+    // DEBIT transactions: expenses, liabilities, and distributions
+    
+    // Add expense categories first
+    customCategories.expense.forEach(cat => {
+      const selected = cat === selectedCategory ? 'selected' : '';
+      if (cat.startsWith('Distribution')) {
+        // Add shareholder-specific distribution options
+        if (cat === 'Distribution') {
+          options += `<option value="${cat}" ${selected}>Distribution (Unassigned)</option>`;
+        } else {
+          settings.shareholders.forEach(shareholder => {
+            const distCat = `Distribution - ${shareholder.name}`;
+            const distSelected = distCat === selectedCategory ? 'selected' : '';
+            options += `<option value="${distCat}" ${distSelected}>Distribution - ${shareholder.name}</option>`;
+          });
+        }
+      } else {
+        options += `<option value="${cat}" ${selected}>${cat}</option>`;
+      }
+    });
+    
+    // Add liability/principal payment categories separator and options
+    if (customCategories.liability && customCategories.liability.length > 0) {
+      options += '<option disabled>──────────</option>';
+      customCategories.liability.forEach(cat => {
+        const selected = cat === selectedCategory ? 'selected' : '';
+        options += `<option value="${cat}" ${selected}>${cat}</option>`;
+      });
+    }
+  }
+  
+  return options;
+}
+
+// Toggle description expansion
+function toggleDescription(element) {
+  const descCell = element.parentElement;
+  const fullDiv = descCell.querySelector('.desc-full');
+  fullDiv.classList.toggle('active');
+}
+
+function closeDescription(element) {
+  const fullDiv = element.parentElement;
+  fullDiv.classList.remove('active');
+}
+
+// Apply filters with full-text search capability
+function applyFilters(){
+  const q = document.getElementById('searchBox').value.toLowerCase();
+  const amountMin = document.getElementById('amountMin').value;
+  const amountMax = document.getElementById('amountMax').value;
+  const from = document.getElementById('dateFrom').value;
+  const to = document.getElementById('dateTo').value;
+  const t = document.getElementById('typeFilter').value;
+  const g = document.getElementById('expenseFilter').value;
+  
+  filteredRows = periodRows.filter(r=>{
+    // Search full description, not shortened version
+    if (q && !r.description.toLowerCase().includes(q)) return false;
+    if (amountMin && r.amount < parseFloat(amountMin)) return false;
+    if (amountMax && r.amount > parseFloat(amountMax)) return false;
+    if (from && r.date < from) return false;
+    if (to && r.date > to) return false;
+    if (t && r.type !== t) return false;
+    if (g){
+      // Handle equity, revenue, expense, and liability categories
+      if (r.type==='Credit') {
+        // Check if filter is revenue or equity category
+        if (isEquityCategory(g) || g.startsWith('Revenue')) {
+          return r.revenueClass===g;
+        }
+      }
+      if (r.type==='Debit') {
+        // Check distributions, liabilities, and expenses
+        if (g.startsWith('Distribution')) return r.expenseClass===g;
+        if (isLiabilityCategory(g)) return r.expenseClass===g;
+        return r.expenseClass===g;
+      }
+      return false;
+    }
+    return true;
+  });
+  
+  const beginBal = Number(document.getElementById('beginBal').value || 0);
+  computeKPIs(filteredRows, beginBal);
+  renderTable(filteredRows, beginBal);
+  buildCharts(filteredRows, beginBal);
+}
+
+// Build professional financial statements
+function buildProfessionalStatements(data) {
+  if (!data || data.length === 0) return;
+  
+  const beginBal = Number(document.getElementById('beginBal').value || 0);
+  
+  // Get period dates
+  const dates = [...new Set(data.map(r=>r.date))].sort();
+  const startDate = dates[0];
+  const endDate = dates[dates.length - 1];
+  
+  // Format dates for display
+  const formatDate = (dateStr) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  };
+  
+  // Calculate financial data using the SAME logic as monthly statement
+  const revenueData = {};
+  const expenseData = {};
+  let distributions = 0;
+  
+  customCategories.revenue.forEach(cat => revenueData[cat] = 0);
+  customCategories.expense.forEach(cat => expenseData[cat] = 0);
+  
+  // Track liability payments separately
+  let principalPayments = 0;
+  
+  // Use EXACT same aggregation logic as monthly statement
+  data.forEach(row => {
+    if (row.type === 'Credit' && row.revenueClass) {
+      revenueData[row.revenueClass] = (revenueData[row.revenueClass] || 0) + row.amount;
+    } else if (row.type === 'Debit' && row.expenseClass) {
+      if (row.expenseClass === 'Distribution' || row.expenseClass.startsWith('Distribution - ')) {
+        distributions += row.amount;
+      } else if (isLiabilityCategory(row.expenseClass)) {
+        principalPayments += row.amount;
+      } else {
+        expenseData[row.expenseClass] = (expenseData[row.expenseClass] || 0) + row.amount;
+      }
+    }
+  });
+  
+  const totalRevenue = Object.entries(revenueData).reduce((sum, [cat, amt]) => {
+    if (!isEquityCategory(cat)) {
+      return sum + amt;
+    }
+    return sum;
+  }, 0);
+  // Use EXACT SAME filtering logic as monthly statement for total expenses (excluding liability payments)
+  const totalExpenses = customCategories.expense.reduce((sum, cat) => {
+    if (expenseData[cat] > 0 && cat !== 'Distribution' && !cat.startsWith('Distribution - ') && !isLiabilityCategory(cat)) {
+      return sum + expenseData[cat];
+    }
+    return sum;
+  }, 0);
+  const netIncome = totalRevenue - totalExpenses;
+  const endingCash = beginBal + totalRevenue - totalExpenses - distributions;
+  
+  // Build Income Statement with dynamic categories
+  document.getElementById('incomeStmtDate').textContent = `For the Period ${formatDate(startDate)} to ${formatDate(endDate)}`;
+  
+  const incomeBody = document.getElementById('incomeStmtBody');
+  let incomeHTML = '<tr class="section-header"><td colspan="2">REVENUES</td></tr>';
+  
+  // Add revenue categories with amounts > 0 in consistent order (EXCLUDE equity categories)
+  customCategories.revenue.forEach(category => {
+    if (!isEquityCategory(category) && revenueData[category] > 0) {
+      const displayName = category.replace('Revenue: ', '');
+      incomeHTML += `<tr><td class="line-item">${displayName}</td><td class="amount positive">${fmt(revenueData[category])}</td></tr>`;
+    }
+  });
+  
+  incomeHTML += `<tr class="subtotal-line"><td><strong>Total Revenues</strong></td><td class="amount positive"><strong>${fmt(totalRevenue)}</strong></td></tr>`;
+  incomeHTML += '<tr><td colspan="2">&nbsp;</td></tr>';
+  incomeHTML += '<tr class="section-header"><td colspan="2">OPERATING EXPENSES</td></tr>';
+  
+  // Add expense categories with amounts > 0 in consistent order  
+  customCategories.expense.forEach(category => {
+    if (expenseData[category] > 0 && category !== 'Distribution' && !category.startsWith('Distribution - ')) {
+      incomeHTML += `<tr><td class="line-item">${category}</td><td class="amount">${fmt(expenseData[category])}</td></tr>`;
+    }
+  });
+  
+  incomeHTML += `<tr class="subtotal-line"><td><strong>Total Operating Expenses</strong></td><td class="amount"><strong>${fmt(totalExpenses)}</strong></td></tr>`;
+  incomeHTML += '<tr><td colspan="2">&nbsp;</td></tr>';
+  incomeHTML += `<tr class="total-line"><td><strong>NET INCOME (LOSS)</strong></td><td class="amount ${netIncome >= 0 ? 'positive' : 'negative'}"><strong>${fmt(netIncome)}</strong></td></tr>`;
+  incomeHTML += '<tr><td colspan="2">&nbsp;</td></tr>';
+  incomeHTML += '<tr class="section-header"><td colspan="2">SUPPLEMENTAL INFORMATION</td></tr>';
+  incomeHTML += `<tr><td class="line-item">Owner Distributions</td><td class="amount">${fmt(distributions)}</td></tr>`;
+  incomeHTML += `<tr><td class="line-item">Net Margin</td><td class="amount">${totalRevenue > 0 ? (netIncome/totalRevenue*100).toFixed(1) + '%' : '0%'}</td></tr>`;
+  
+  incomeBody.innerHTML = incomeHTML;
+  
+  // Build Cash Flow Statement
+  document.getElementById('cashFlowDate').textContent = `For the Period ${formatDate(startDate)} to ${formatDate(endDate)}`;
+  
+  // Calculate capital injections from all equity categories
+  const capitalInjections = Object.entries(revenueData).reduce((sum, [cat, amt]) => {
+    if (isEquityCategory(cat)) {
+      return sum + amt;
+    }
+    return sum;
+  }, 0);
+  
+  const cashFlowBody = document.getElementById('cashFlowBody');
+  cashFlowBody.innerHTML = `
+    <tr class="section-header"><td colspan="2">CASH FLOWS FROM OPERATING ACTIVITIES</td></tr>
+    <tr><td class="line-item">Net Income</td><td class="amount ${netIncome >= 0 ? 'positive' : 'negative'}">${fmt(netIncome)}</td></tr>
+    <tr><td class="line-item">Adjustments to reconcile net income to net cash:</td><td></td></tr>
+    <tr><td class="sub-item">Depreciation and Amortization</td><td class="amount">—</td></tr>
+    <tr><td class="sub-item">Changes in Accounts Receivable</td><td class="amount">—</td></tr>
+    <tr><td class="sub-item">Changes in Prepaid Expenses</td><td class="amount">—</td></tr>
+    <tr><td class="sub-item">Changes in Accounts Payable</td><td class="amount">—</td></tr>
+    <tr><td class="sub-item">Changes in Accrued Expenses</td><td class="amount">—</td></tr>
+    <tr class="subtotal-line"><td><strong>Net Cash Provided by Operating Activities</strong></td><td class="amount"><strong>${fmt(netIncome)}</strong></td></tr>
+    <tr><td colspan="2">&nbsp;</td></tr>
+    <tr class="section-header"><td colspan="2">CASH FLOWS FROM INVESTING ACTIVITIES</td></tr>
+    <tr><td class="line-item">Purchase of Medical Equipment</td><td class="amount">—</td></tr>
+    <tr><td class="line-item">Other Investing Activities</td><td class="amount">—</td></tr>
+    <tr class="subtotal-line"><td><strong>Net Cash Used in Investing Activities</strong></td><td class="amount"><strong>$0.00</strong></td></tr>
+    <tr><td colspan="2">&nbsp;</td></tr>
+    <tr class="section-header"><td colspan="2">CASH FLOWS FROM FINANCING ACTIVITIES</td></tr>
+    <tr><td class="line-item">Owner/Capital Contributions</td><td class="amount positive">${capitalInjections > 0 ? fmt(capitalInjections) : '—'}</td></tr>
+    <tr><td class="line-item">Owner Distributions</td><td class="amount negative">(${fmt(distributions)})</td></tr>
+    <tr><td class="line-item">Equipment Loan Proceeds</td><td class="amount">—</td></tr>
+    <tr><td class="line-item">Loan Principal Repayments</td><td class="amount negative">${principalPayments > 0 ? '(' + fmt(principalPayments) + ')' : '—'}</td></tr>
+    <tr class="subtotal-line"><td><strong>Net Cash ${(capitalInjections - distributions - principalPayments) >= 0 ? 'Provided by' : 'Used in'} Financing Activities</strong></td><td class="amount ${(capitalInjections - distributions - principalPayments) >= 0 ? 'positive' : 'negative'}"><strong>${fmt(capitalInjections - distributions - principalPayments)}</strong></td></tr>
+    <tr><td colspan="2">&nbsp;</td></tr>
+    <tr class="subtotal-line"><td><strong>Net Increase (Decrease) in Cash</strong></td><td class="amount ${(netIncome + capitalInjections - distributions - principalPayments) >= 0 ? 'positive' : 'negative'}"><strong>${fmt(netIncome + capitalInjections - distributions - principalPayments)}</strong></td></tr>
+    <tr><td class="line-item">Cash at Beginning of Period</td><td class="amount">${fmt(beginBal)}</td></tr>
+    <tr class="total-line"><td><strong>CASH AT END OF PERIOD</strong></td><td class="amount"><strong>${fmt(beginBal + netIncome + capitalInjections - distributions - principalPayments)}</strong></td></tr>
+  `;
+}
+
+// Build professional balance sheet from editor data
+function buildProfessionalBalanceSheet() {
+  // Get the current date for "as of" date
+  const asOfDate = document.getElementById('bs-as-of').value;
+  const formatDate = (dateStr) => {
+    if (!dateStr) return 'Current Date';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  };
+  
+  document.getElementById('balanceSheetDate').textContent = `As of ${formatDate(asOfDate)}`;
+  
+  const balanceBody = document.getElementById('balanceSheetBody');
+  
+  // Build from the interactive editor data
+  let assetsHTML = '<tr class="section-header"><td colspan="2">ASSETS</td></tr>';
+  let assetsTotal = 0;
+  
+  balanceSheetData.assets.forEach(asset => {
+    if (asset.amount !== 0 || asset.name !== '') {
+      assetsHTML += `<tr><td class="${asset.isSubAccount ? 'sub-item' : 'line-item'}">${asset.name}</td><td class="amount">${fmt(asset.amount)}</td></tr>`;
+      assetsTotal += asset.amount;
+    }
+  });
+  
+  assetsHTML += `<tr class="subtotal-line"><td><strong>Total Assets</strong></td><td class="amount"><strong>${fmt(assetsTotal)}</strong></td></tr>`;
+  
+  let liabilitiesHTML = '<tr><td colspan="2">&nbsp;</td></tr><tr class="section-header"><td colspan="2">LIABILITIES</td></tr>';
+  let liabilitiesTotal = 0;
+  
+  balanceSheetData.liabilities.forEach(liability => {
+    if (liability.amount !== 0 || liability.name !== '') {
+      liabilitiesHTML += `<tr><td class="${liability.isSubAccount ? 'sub-item' : 'line-item'}">${liability.name}</td><td class="amount">${fmt(liability.amount)}</td></tr>`;
+      liabilitiesTotal += liability.amount;
+    }
+  });
+  
+  liabilitiesHTML += `<tr class="subtotal-line"><td><strong>Total Liabilities</strong></td><td class="amount"><strong>${fmt(liabilitiesTotal)}</strong></td></tr>`;
+  
+  let equityHTML = '<tr><td colspan="2">&nbsp;</td></tr><tr class="section-header"><td colspan="2">OWNER\'S EQUITY</td></tr>';
+  let equityTotal = 0;
+  
+  balanceSheetData.equity.forEach(equity => {
+    if (equity.amount !== 0 || equity.name !== '') {
+      const cssClass = equity.amount < 0 ? 'amount negative' : 'amount';
+      equityHTML += `<tr><td class="${equity.isSubAccount ? 'sub-item' : 'line-item'}">${equity.name}</td><td class="${cssClass}">${fmt(equity.amount)}</td></tr>`;
+      equityTotal += equity.amount;
+    }
+  });
+  
+  equityHTML += `<tr class="subtotal-line"><td><strong>Total Owner's Equity</strong></td><td class="amount"><strong>${fmt(equityTotal)}</strong></td></tr>`;
+  equityHTML += '<tr><td colspan="2">&nbsp;</td></tr>';
+  equityHTML += `<tr class="total-line"><td><strong>TOTAL LIABILITIES & EQUITY</strong></td><td class="amount"><strong>${fmt(liabilitiesTotal + equityTotal)}</strong></td></tr>`;
+  
+  balanceBody.innerHTML = assetsHTML + liabilitiesHTML + equityHTML;
+}
+
+// Build monthly income statement with individual month columns
+function buildMonthlyIncomeStatement(data){
+  if (!data || data.length === 0) return;
+  
+  // Get all unique months from the data
+  const monthsSet = new Set();
+  data.forEach(row => {
+    if (row.date) {
+      const monthKey = row.date.substring(0, 7); // YYYY-MM
+      monthsSet.add(monthKey);
+    }
+  });
+  
+  const months = Array.from(monthsSet).sort();
+  if (months.length === 0) return;
+  
+  // Calculate data for each month using dynamic categories
+  const monthlyData = {};
+  months.forEach(month => {
+    monthlyData[month] = {};
+    customCategories.revenue.forEach(cat => monthlyData[month][cat] = 0);
+    customCategories.expense.forEach(cat => monthlyData[month][cat] = 0);
+  });
+  
+  // Aggregate data by month - USE EXACT SAME LOGIC AS PROFESSIONAL STATEMENT
+  data.forEach(row => {
+    if (!row.date) return;
+    const month = row.date.substring(0, 7);
+    if (!monthlyData[month]) return;
+    
+    if (row.type === 'Credit' && row.revenueClass) {
+      monthlyData[month][row.revenueClass] = (monthlyData[month][row.revenueClass] || 0) + row.amount;
+    } else if (row.type === 'Debit' && row.expenseClass) {
+      // USE EXACT SAME DISTRIBUTION LOGIC AS PROFESSIONAL STATEMENT
+      if (row.expenseClass === 'Distribution' || row.expenseClass.startsWith('Distribution - ')) {
+        // Skip distributions - they don't go into operating expenses
+      } else {
+        monthlyData[month][row.expenseClass] = (monthlyData[month][row.expenseClass] || 0) + row.amount;
+      }
+    }
+  });
+  
+  // Calculate totals using EXACT SAME logic
+  const totals = {};
+  customCategories.revenue.forEach(cat => totals[cat] = 0);
+  customCategories.expense.forEach(cat => totals[cat] = 0);
+  
+  Object.values(monthlyData).forEach(month => {
+    Object.keys(totals).forEach(key => {
+      totals[key] += month[key] || 0;
+    });
+  });
+  
+  // Build table headers
+  const headerRow = document.getElementById('monthHeaders');
+  headerRow.innerHTML = '<th>Line Item</th>';
+  months.forEach(month => {
+    const [year, monthNum] = month.split('-');
+    const monthName = getMonthName(parseInt(monthNum));
+    headerRow.innerHTML += `<th>${monthName} ${year}</th>`;
+  });
+  // Use TTM Total if in TTM mode, otherwise YTD Total
+  const totalColumnLabel = currentPeriodType === 'ttm' ? 'TTM Total' : 'YTD Total';
+  headerRow.innerHTML += `<th class="ytd-col">${totalColumnLabel}</th>`;
+  
+  // Build table body
+  const tbody = document.getElementById('stmtTableBody');
+  tbody.innerHTML = '';
+  
+  // Revenue Section - USE SAME ORDER AS PROFESSIONAL STATEMENT
+  tbody.innerHTML += '<tr class="section-header"><td colspan="' + (months.length + 2) + '">REVENUES</td></tr>';
+  
+  customCategories.revenue.forEach(category => {
+    // EXCLUDE equity categories from operating revenue
+    if (!isEquityCategory(category) && totals[category] > 0) {
+      const displayName = category.replace('Revenue: ', '');
+      let row = `<tr><td>${displayName}</td>`;
+      months.forEach(month => {
+        row += `<td class="positive">${fmt(monthlyData[month][category] || 0)}</td>`;
+      });
+      row += `<td class="positive ytd-col">${fmt(totals[category])}</td></tr>`;
+      tbody.innerHTML += row;
+    }
+  });
+  
+  // Total Revenue (EXCLUDING equity categories)
+  let row = '<tr class="subtotal-row"><td><strong>Total Revenues</strong></td>';
+  months.forEach(month => {
+    const total = customCategories.revenue.reduce((sum, cat) => {
+      if (!isEquityCategory(cat)) {
+        return sum + (monthlyData[month][cat] || 0);
+      }
+      return sum;
+    }, 0);
+    row += `<td class="positive"><strong>${fmt(total)}</strong></td>`;
+  });
+  const totalRevenue = customCategories.revenue.reduce((sum, cat) => {
+    if (!isEquityCategory(cat)) {
+      return sum + totals[cat];
+    }
+    return sum;
+  }, 0);
+  row += `<td class="positive ytd-col"><strong>${fmt(totalRevenue)}</strong></td></tr>`;
+  tbody.innerHTML += row;
+  
+  // Expense Section - USE SAME ORDER AND LOGIC AS PROFESSIONAL STATEMENT
+  tbody.innerHTML += '<tr class="section-header"><td colspan="' + (months.length + 2) + '">OPERATING EXPENSES</td></tr>';
+  
+  customCategories.expense.forEach(category => {
+    if (totals[category] > 0 && category !== 'Distribution' && !category.startsWith('Distribution - ')) {
+      let row = `<tr><td>${category}</td>`;
+      months.forEach(month => {
+        row += `<td class="negative">${fmt(monthlyData[month][category] || 0)}</td>`;
+      });
+      row += `<td class="negative ytd-col">${fmt(totals[category])}</td></tr>`;
+      tbody.innerHTML += row;
+    }
+  });
+  
+  // Total Expenses
+  row = '<tr class="subtotal-row"><td><strong>Total Operating Expenses</strong></td>';
+  months.forEach(month => {
+    const total = customCategories.expense.reduce((sum, cat) => {
+      if (cat !== 'Distribution' && !cat.startsWith('Distribution - ')) {
+        return sum + (monthlyData[month][cat] || 0);
+      }
+      return sum;
+    }, 0);
+    row += `<td class="negative"><strong>${fmt(total)}</strong></td>`;
+  });
+  const totalExpenses = customCategories.expense.reduce((sum, cat) => {
+    if (cat !== 'Distribution' && !cat.startsWith('Distribution - ')) {
+      return sum + totals[cat];
+    }
+    return sum;
+  }, 0);
+  row += `<td class="negative ytd-col"><strong>${fmt(totalExpenses)}</strong></td></tr>`;
+  tbody.innerHTML += row;
+  
+  // Net Income - MUST MATCH PROFESSIONAL STATEMENT (EXCLUDING equity categories)
+  row = '<tr class="total-row"><td><strong>NET INCOME (LOSS)</strong></td>';
+  months.forEach(month => {
+    const revenue = customCategories.revenue.reduce((sum, cat) => {
+      if (!isEquityCategory(cat)) {
+        return sum + (monthlyData[month][cat] || 0);
+      }
+      return sum;
+    }, 0);
+    const expenses = customCategories.expense.reduce((sum, cat) => {
+      if (cat !== 'Distribution' && !cat.startsWith('Distribution - ')) {
+        return sum + (monthlyData[month][cat] || 0);
+      }
+      return sum;
+    }, 0);
+    const net = revenue - expenses;
+    row += `<td class="${net >= 0 ? 'positive' : 'negative'}"><strong>${fmt(net)}</strong></td>`;
+  });
+  const netIncome = totalRevenue - totalExpenses;
+  row += `<td class="${netIncome >= 0 ? 'positive' : 'negative'} ytd-col"><strong>${fmt(netIncome)}</strong></td></tr>`;
+  tbody.innerHTML += row;
+  
+  // Update period display
+  const dates = [...new Set(data.map(r=>r.date))].sort();
+  if (dates.length){
+    document.getElementById('stmtPeriod').textContent = `Period: ${dates[0]} - ${dates[dates.length-1]}`;
+  }
+}
+
+// Export Statement functions
+function exportStatementPDF(type) {
+  if (typeof window.jspdf === 'undefined' || !window.jspdf) {
+    alert('PDF export library not loaded. Please refresh the page and try again.');
+    return;
+  }
+  
+  const { jsPDF } = window.jspdf;
+  
+  // Create container for rendering
+  const container = document.createElement('div');
+  container.style.position = 'fixed';
+  container.style.left = '-9999px';
+  container.style.top = '0';
+  container.style.width = '816px';
+  container.style.background = '#ffffff';
+  document.body.appendChild(container);
+  
+  // Get the appropriate statement
+  let statementEl, title, dateText;
+  if (type === 'income') {
+    statementEl = document.querySelector('#income-statement-tab .financial-statement');
+    title = 'Income Statement';
+    dateText = document.getElementById('incomeStmtDate').textContent;
+  } else if (type === 'balance') {
+    statementEl = document.querySelector('#balance-sheet-tab .financial-statement');
+    title = 'Balance Sheet';
+    dateText = document.getElementById('balanceSheetDate').textContent;
+  } else if (type === 'cashflow') {
+    statementEl = document.querySelector('#cash-flow-tab .financial-statement');
+    title = 'Statement of Cash Flows';
+    dateText = document.getElementById('cashFlowDate').textContent;
+  }
+  
+  if (!statementEl) {
+    alert('Statement not found. Please ensure data is loaded.');
+    document.body.removeChild(container);
+    return;
+  }
+  
+  // Clone and prepare the statement
+  const clone = statementEl.cloneNode(true);
+  clone.style.background = '#ffffff';
+  clone.style.color = '#000000';
+  clone.style.padding = '30px';
+  clone.style.width = '100%';
+  
+  // Fix all text colors to black
+  clone.querySelectorAll('*').forEach(el => {
+    el.style.color = '#000000';
+    el.style.background = el.classList.contains('section-header') ? '#f0f7fc' : 
+                         el.classList.contains('total-line') ? '#e8f5f9' :
+                         el.classList.contains('subtotal-line') ? '#f9f9f9' : '#ffffff';
+  });
+  
+  container.appendChild(clone);
+  
+  // Use html2canvas to capture the statement
+  html2canvas(container, {
+    scale: 2,
+    backgroundColor: '#ffffff',
+    useCORS: true,
+    logging: false
+  }).then(canvas => {
+    const pdf = new jsPDF('p', 'pt', 'letter');
+    const imgData = canvas.toDataURL('image/png');
+    
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    const margin = 36; // 0.5 inch margins
+    
+    const imgWidth = pdfWidth - (margin * 2);
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    
+    // Add image to PDF
+    pdf.addImage(imgData, 'PNG', margin, margin, imgWidth, imgHeight);
+    
+    // Save PDF
+    const filename = `${title.replace(/\s+/g, '_')}_${settings.practiceName.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0,10)}.pdf`;
+    pdf.save(filename);
+    
+    // Clean up
+    document.body.removeChild(container);
+  }).catch(err => {
+    console.error('PDF generation error:', err);
+    alert('Error generating PDF. Please try again.');
+    document.body.removeChild(container);
+  });
+}
+
+function exportStatementExcel(type) {
+  // Create CSV data
+  let csv = settings.practiceName + '\n';
+  csv += settings.practiceAddress1 + '\n';
+  csv += settings.practiceAddress2 + '\n\n';
+  
+  let title = '';
+  if (type === 'income') title = 'INCOME STATEMENT';
+  else if (type === 'balance') title = 'BALANCE SHEET';
+  else if (type === 'cashflow') title = 'STATEMENT OF CASH FLOWS';
+  csv += title + '\n';
+  
+  let dateText = '';
+  if (type === 'income') dateText = document.getElementById('incomeStmtDate').textContent;
+  else if (type === 'balance') dateText = document.getElementById('balanceSheetDate').textContent;
+  else if (type === 'cashflow') dateText = document.getElementById('cashFlowDate').textContent;
+  csv += dateText + '\n\n';
+  
+  // Get table data
+  let tableId = '';
+  if (type === 'income') tableId = 'incomeStatementTable';
+  else if (type === 'balance') tableId = 'balanceSheetTable';
+  else if (type === 'cashflow') tableId = 'cashFlowTable';
+  
+  const table = document.getElementById(tableId);
+  if (!table) {
+    alert('Table not found. Please ensure data is loaded.');
+    return;
+  }
+  
+  table.querySelectorAll('tr').forEach(tr => {
+    const row = [];
+    tr.querySelectorAll('td').forEach(td => {
+      const text = td.textContent.trim();
+      row.push(text.includes(',') ? `"${text}"` : text);
+    });
+    if (row.length > 0) csv += row.join(',') + '\n';
+  });
+  
+  // Download CSV
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${type}_statement_${settings.practiceName.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Generate All Financial Statements Function
+function generateAllStatements() {
+  if (!periodRows || periodRows.length === 0) {
+    alert('Please load data and select a period first.');
+    return;
+  }
+  
+  if (typeof window.jspdf === 'undefined' || !window.jspdf) {
+    alert('PDF export library not loaded. Please refresh the page and try again.');
+    return;
+  }
+  
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF('p', 'pt', 'letter');
+  
+  // Create container for rendering
+  const container = document.createElement('div');
+  container.style.position = 'fixed';
+  container.style.left = '-9999px';
+  container.style.top = '0';
+  container.style.width = '816px';
+  container.style.background = '#ffffff';
+  document.body.appendChild(container);
+  
+  // Array of statements to export
+  const statements = [
+    { selector: '#income-statement-tab .financial-statement', title: 'Income Statement' },
+    { selector: '#balance-sheet-tab .financial-statement', title: 'Balance Sheet' },
+    { selector: '#cash-flow-tab .financial-statement', title: 'Statement of Cash Flows' }
+  ];
+  
+  let currentPage = 0;
+  
+  // Process each statement
+  const processStatements = async () => {
+    for (let i = 0; i < statements.length; i++) {
+      const statementEl = document.querySelector(statements[i].selector);
+      if (!statementEl) continue;
+      
+      // Clear container
+      container.innerHTML = '';
+      
+      // Clone and prepare the statement
+      const clone = statementEl.cloneNode(true);
+      clone.style.background = '#ffffff';
+      clone.style.color = '#000000';
+      clone.style.padding = '30px';
+      clone.style.width = '100%';
+      
+      // Fix all text colors to black
+      clone.querySelectorAll('*').forEach(el => {
+        el.style.color = '#000000';
+        el.style.background = el.classList.contains('section-header') ? '#f0f7fc' : 
+                             el.classList.contains('total-line') ? '#e8f5f9' :
+                             el.classList.contains('subtotal-line') ? '#f9f9f9' : '#ffffff';
+      });
+      
+      container.appendChild(clone);
+      
+      // Capture with html2canvas
+      const canvas = await html2canvas(container, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        useCORS: true,
+        logging: false
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const margin = 36; // 0.5 inch margins
+      
+      const imgWidth = pdfWidth - (margin * 2);
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      // Add new page if not first statement
+      if (currentPage > 0) {
+        pdf.addPage();
+      }
+      
+      // Add image to PDF
+      pdf.addImage(imgData, 'PNG', margin, margin, imgWidth, imgHeight);
+      currentPage++;
+    }
+    
+    // Save PDF
+    pdf.save(`MedCash_Financial_Statements_${settings.practiceName.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0,10)}.pdf`);
+    
+    // Clean up
+    document.body.removeChild(container);
+  };
+  
+  processStatements().catch(err => {
+    console.error('PDF generation error:', err);
+    alert('Error generating PDF. Please try again.');
+    if (container.parentNode) {
+      document.body.removeChild(container);
+    }
+  });
+}
+
+function exportFilteredCSV(){
+  const headers = ['Date','Account','Description','Check Number','GL Category','Type','Amount'];
+  const rows = filteredRows.map(r=>{
+    let cat = r.type==='Credit' ? r.revenueClass : r.expenseClass;
+    return [r.date,r.accountName||'',r.description,r.checkNumber||'',cat,r.type,(r.type==='Credit'? r.amount : -r.amount)];
+  });
+  const csv = [headers, ...rows].map(row=>row.map(cell=>{
+    const str = String(cell);
+    return str.includes(',') ? `"${str}"` : str;
+  }).join(',')).join('\n');
+  const blob = new Blob([csv],{type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; 
+  a.download=`medcash-transactions-${new Date().toISOString().slice(0,10)}.csv`; 
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Save/Load Functions
+function saveVersion() {
+  const versionName = document.getElementById('versionName').value.trim();
+  if (!versionName) {
+    alert('Please enter a version name (e.g., "January 2025 Final")');
+    return;
+  }
+  
+  if (allRows.length === 0) {
+    alert('No data to save. Please load data first.');
+    return;
+  }
+  
+  // Prepare data to embed
+  const saveData = {
+    version: '2.0',
+    versionName: versionName,
+    savedAt: new Date().toISOString(),
+    allRows: allRows,
+    currentPeriodType: currentPeriodType,
+    periodSettings: {
+      month: document.getElementById('periodPicker').value,
+      year: document.getElementById('yearPicker').value,
+      quarter: document.getElementById('quarterPicker').value,
+      ttmStartMonth: document.getElementById('ttmStartMonth').value,
+      ttmEndMonth: document.getElementById('ttmEndMonth').value,
+      beginBalance: document.getElementById('beginBal').value
+    },
+    filters: {
+      search: document.getElementById('searchBox').value,
+      amountMin: document.getElementById('amountMin').value,
+      amountMax: document.getElementById('amountMax').value,
+      dateFrom: document.getElementById('dateFrom').value,
+      dateTo: document.getElementById('dateTo').value,
+      type: document.getElementById('typeFilter').value,
+      expense: document.getElementById('expenseFilter').value
+    },
+    balanceSheetData: balanceSheetData,
+    settings: settings,
+    customCategories: customCategories
+  };
+  
+  // Get the current HTML
+  const currentHtml = document.documentElement.outerHTML;
+  
+  // Replace the embedded data script content
+  const newHtml = currentHtml.replace(
+    /<script id="embeddedData"[^>]*>.*?<\/script>/s,
+    `<script id="embeddedData" type="application/json">${JSON.stringify(saveData)}<\/script>`
+  );
+  
+  // Create download
+  const blob = new Blob([newHtml], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `MedCash_${versionName.replace(/[^a-z0-9]/gi, '_')}_${new Date().toISOString().slice(0,10)}.html`;
+  a.click();
+  URL.revokeObjectURL(url);
+  
+  // Update UI
+  currentVersionName = versionName;
+  dataModified = false;
+  updateVersionDisplay();
+  
+  // Show success message
+  const statusEl = document.getElementById('dataStatus');
+  statusEl.textContent = 'Version saved successfully!';
+  statusEl.style.color = '#10b981';
+  setTimeout(() => {
+    updateVersionDisplay();
+  }, 3000);
+}
+
+function loadVersion(file) {
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const htmlContent = e.target.result;
+    
+    // Extract embedded data from the loaded file
+    const match = htmlContent.match(/<script id="embeddedData"[^>]*>(.*?)<\/script>/s);
+    if (match && match[1] && match[1] !== 'null') {
+      try {
+        const data = JSON.parse(match[1]);
+        
+        if (confirm(`Load version "${data.versionName}" saved on ${new Date(data.savedAt).toLocaleString()}?`)) {
+          restoreFromEmbeddedData(data);
+        }
+      } catch (e) {
+        alert('Error reading saved data from file. The file may be corrupted.');
+        console.error(e);
+      }
+    } else {
+      alert('No saved data found in this file.');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function restoreFromEmbeddedData(data) {
+  // Restore all data
+  allRows = data.allRows || [];
+  currentPeriodType = data.currentPeriodType || 'month';
+  currentVersionName = data.versionName || 'Loaded Version';
+  
+  // Restore balance sheet data
+  if (data.balanceSheetData) {
+    balanceSheetData = data.balanceSheetData;
+    renderBalanceSheetBuilder();
+  }
+  
+  // Restore settings
+  if (data.settings) {
+    settings = data.settings;
+    updateSettingsUI();
+  }
+  
+  // Restore custom categories
+  if (data.customCategories) {
+    customCategories = data.customCategories;
+    renderCategoryLists();
+    updateCategoryFilters();
+  }
+  
+  // Restore period settings
+  if (data.periodSettings) {
+    setPeriodType(currentPeriodType);
+    document.getElementById('periodPicker').value = data.periodSettings.month || '';
+    document.getElementById('yearPicker').value = data.periodSettings.year || '';
+    document.getElementById('quarterPicker').value = data.periodSettings.quarter || '';
+    document.getElementById('ttmStartMonth').value = data.periodSettings.ttmStartMonth || '';
+    document.getElementById('ttmEndMonth').value = data.periodSettings.ttmEndMonth || '';
+    document.getElementById('beginBal').value = data.periodSettings.beginBalance || '';
+  }
+  
+  // Restore filters
+  if (data.filters) {
+    document.getElementById('searchBox').value = data.filters.search || '';
+    document.getElementById('amountMin').value = data.filters.amountMin || '';
+    document.getElementById('amountMax').value = data.filters.amountMax || '';
+    document.getElementById('dateFrom').value = data.filters.dateFrom || '';
+    document.getElementById('dateTo').value = data.filters.dateTo || '';
+    document.getElementById('typeFilter').value = data.filters.type || '';
+    document.getElementById('expenseFilter').value = data.filters.expense || '';
+  }
+  
+  // Update UI
+  if (allRows.length > 0) {
+    document.getElementById('statusBox').style.display='block';
+    document.getElementById('statusMsg').textContent = ` • ${allRows.length} transactions loaded from ${currentVersionName}`;
+    
+    const dates = [...new Set(allRows.map(r=>r.date))].sort();
+    if (dates.length){
+      document.getElementById('periodPill').textContent = `Data: ${dates[0]} - ${dates[dates.length-1]}`;
+    }
+    
+    // Apply period filter if set
+    if (data.periodSettings && (data.periodSettings.month || data.periodSettings.year)) {
+      filterToPeriod();
+      applyFilters();
+    }
+    
+    // Show save button
+    document.getElementById('saveVersionBtn').style.display = 'inline-block';
+    document.getElementById('exportDataBtn').style.display = 'inline-block';
+    
+    // Update version display
+    updateVersionDisplay();
+    
+    // Build statements
+    buildMonthlyIncomeStatement(allRows);
+    buildProfessionalStatements(periodRows);
+    buildProfessionalBalanceSheet();
+    buildShareholderAnalysis(periodRows);
+    
+    // Show success
+    const statusEl = document.getElementById('dataStatus');
+    statusEl.textContent = `Loaded: ${new Date(data.savedAt).toLocaleString()}`;
+  }
+}
+
+function exportDataOnly() {
+  if (allRows.length === 0) {
+    alert('No data to export.');
+    return;
+  }
+  
+  const exportData = {
+    version: '2.0',
+    exportedAt: new Date().toISOString(),
+    versionName: currentVersionName || 'Unnamed',
+    transactions: allRows,
+    balanceSheetData: balanceSheetData,
+    settings: settings,
+    customCategories: customCategories,
+    periodSettings: {
+      periodType: currentPeriodType,
+      month: document.getElementById('periodPicker').value,
+      year: document.getElementById('yearPicker').value,
+      quarter: document.getElementById('quarterPicker').value,
+      ttmStartMonth: document.getElementById('ttmStartMonth').value,
+      ttmEndMonth: document.getElementById('ttmEndMonth').value,
+      beginBalance: document.getElementById('beginBal').value
+    }
+  };
+  
+  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `MedCash_Data_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function updateVersionDisplay() {
+  const versionBadge = document.getElementById('currentVersion');
+  const statusEl = document.getElementById('dataStatus');
+  
+  if (allRows.length > 0) {
+    versionBadge.textContent = currentVersionName || 'Unsaved Version';
+    if (dataModified) {
+      versionBadge.style.background = 'rgba(245,158,11,.15)';
+      versionBadge.style.color = '#f59e0b';
+      versionBadge.style.borderColor = 'rgba(245,158,11,.3)';
+      statusEl.textContent = 'Unsaved changes';
+      statusEl.style.color = '#f59e0b';
+    } else {
+      versionBadge.style.background = 'rgba(31,122,140,.15)';
+      versionBadge.style.color = 'var(--aegean)';
+      versionBadge.style.borderColor = 'rgba(31,122,140,.3)';
+      statusEl.textContent = '';
+    }
+  } else {
+    versionBadge.textContent = 'No data loaded';
+    statusEl.textContent = '';
+  }
+}
+
+// Event Listeners
+document.getElementById('loadBtn').addEventListener('click', async ()=>{
+  const file = document.getElementById('fileInput').files?.[0];
+  if (!file){ alert('Please select a CSV file first'); return; }
+  const loadBtnText = document.getElementById('loadBtnText');
+  loadBtnText.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid var(--brand);border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite"></span> Processing...';
+  try{
+    const text = await file.text();
+    const data = await processCSV(text);
+    ingestData(data);
+    buildMonthlyIncomeStatement(allRows);
+  }catch(e){
+    console.error(e); 
+    alert('Error processing file: ' + e.message); 
+  }finally{
+    loadBtnText.textContent='Load Bank CSV';
+  }
+});
+
+document.getElementById('applyPeriod').addEventListener('click', ()=>{
+  filterToPeriod();
+  if (periodRows.length === 0) {
+    alert('No data found for selected period');
+    return;
+  }
+  applyFilters();
+  buildMonthlyIncomeStatement(allRows);
+  buildProfessionalStatements(periodRows);
+  buildProfessionalBalanceSheet();
+  buildShareholderAnalysis(periodRows);
+});
+
+document.getElementById('resetPeriod').addEventListener('click', ()=>{
+  document.getElementById('periodPicker').value='';
+  document.getElementById('yearPicker').value='';
+  document.getElementById('quarterPicker').value='';
+  document.getElementById('ttmStartMonth').value='';
+  document.getElementById('ttmEndMonth').value='';
+  document.getElementById('beginBal').value='';
+  periodRows=[]; 
+  filteredRows=[];
+  destroyCharts();
+  document.querySelector('#txnTable tbody').innerHTML='';
+  document.getElementById('periodPill').textContent = 'No period selected';
+  dataModified = true;
+  updateVersionDisplay();
+});
+
+// Save/Load/Export Event Listeners
+document.getElementById('saveVersionBtn').addEventListener('click', saveVersion);
+document.getElementById('loadVersionBtn').addEventListener('click', () => {
+  document.getElementById('loadVersionFile').click();
+});
+document.getElementById('loadVersionFile').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    loadVersion(file);
+    e.target.value = ''; // Reset input so same file can be loaded again
+  }
+});
+document.getElementById('exportDataBtn').addEventListener('click', exportDataOnly);
+
+// Input listeners with modification tracking
+['searchBox','amountMin','amountMax','dateFrom','dateTo','typeFilter','expenseFilter','beginBal'].forEach(id=>{
+  const element = document.getElementById(id);
+  if (element) {
+    element.addEventListener('input', () => {
+      applyFilters();
+      dataModified = true;
+      updateVersionDisplay();
+    });
+  }
+});
+
+document.getElementById('clearFilters').addEventListener('click', ()=>{
+  document.getElementById('searchBox').value='';
+  document.getElementById('amountMin').value='';
+  document.getElementById('amountMax').value='';
+  document.getElementById('dateFrom').value='';
+  document.getElementById('dateTo').value='';
+  document.getElementById('typeFilter').value='';
+  document.getElementById('expenseFilter').value='';
+  applyFilters();
+  dataModified = true;
+  updateVersionDisplay();
+});
+
+document.getElementById('resetCategories').addEventListener('click', ()=>{
+  if (confirm('Reset all transactions to auto-categorization? Your manual changes will be lost.')) {
+    // Reset all transactions to their original classifications
+    allRows.forEach(row => {
+      if (row.type === 'Debit') {
+        row.expenseClass = row.originalExpenseClass;
+      } else {
+        row.revenueClass = row.originalRevenueClass;
+      }
+      row.isManuallyEdited = false;
+    });
+    
+    // Refresh everything
+    applyFilters();
+    buildMonthlyIncomeStatement(allRows);
+    buildProfessionalStatements(periodRows);
+    buildProfessionalBalanceSheet();
+    buildShareholderAnalysis(periodRows);
+    dataModified = true;
+    updateVersionDisplay();
+  }
+});
+
+document.getElementById('exportFiltered').addEventListener('click', exportFilteredCSV);
+
+document.getElementById('downloadTemplate').addEventListener('click', ()=>{
+  const template = `Account Name,Processed Date,Description,Check Number,Credit or Debit,Amount
+Operating Account,08/31/2025,PATIENT PAYMENT,,Credit,850.00
+Operating Account,08/30/2025,BCBS PAYMENT,,Credit,12500.00
+Operating Account,08/29/2025,GUSTO PAYROLL,1234,Debit,8750.00
+Operating Account,08/28/2025,MEDICAID PAYMENT,,Credit,4250.75
+Operating Account,08/27/2025,OFFICE RENT,1235,Debit,6500.00
+Operating Account,08/26/2025,MEDICAL SUPPLIES,1236,Debit,1200.00
+Operating Account,08/24/2025,MEDICARE PAYMENT,,Credit,8500.00
+Operating Account,08/23/2025,GLOBAL PAYMENTS,,Credit,1850.00
+Operating Account,08/22/2025,MOBILE DEPOSIT,,Credit,750.00
+Operating Account,08/21/2025,OWNER DISTRIBUTION,1237,Debit,5000.00`;
+  const blob = new Blob([template],{type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); 
+  a.href=url; 
+  a.download='medical-practice-bank-template.csv'; 
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+// Balance sheet date picker default
+document.getElementById('bs-as-of').value = new Date().toISOString().slice(0, 10);
+
+// Initialize
+const style = document.createElement('style');
+style.textContent='@keyframes spin{to{transform:rotate(360deg)}}';
+document.head.appendChild(style);
+
+// Set current year options
+const currentYear = new Date().getFullYear();
+const yearSelect = document.getElementById('yearPicker');
+yearSelect.innerHTML = '<option value="">Select Year</option>';
+for(let y = currentYear + 1; y >= currentYear - 5; y--){
+  yearSelect.innerHTML += `<option value="${y}">${y}</option>`;
+}
+</script>
+
+<!-- === BULK REASSIGN: SCRIPT (Injected) === -->
+<script>
+(function(){
+  // Run after DOM is ready
+  document.addEventListener('DOMContentLoaded', function(){
+    try {
+      const txnTab = document.getElementById('transactions-tab');
+      const table = txnTab ? txnTab.querySelector('#txnTable') : null;
+      const tbody = table ? table.querySelector('tbody') : null;
+      const headerRow = table ? table.querySelector('thead tr') : null;
+      const panel = document.getElementById('bulkReassignPanel');
+      if(!txnTab || !table || !tbody || !headerRow || !panel){
+        console.warn('[BulkReassign] Transactions table not ready yet.');
+        return;
+      }
+
+      // --- Add a "Select" checkbox column to the table (as first column) ---
+      const selectHeader = document.createElement('th');
+      selectHeader.textContent = 'Select';
+      selectHeader.style.minWidth = '72px';
+      headerRow.insertBefore(selectHeader, headerRow.firstElementChild);
+
+      // Keep selection state in a WeakSet of TRs
+      const selectedRows = new WeakSet();
+
+      // Helper to refresh selected count
+      function refreshSelectedCount(){
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const count = rows.reduce((acc, tr)=> acc + (selectedRows.has(tr) ? 1 : 0), 0);
+        document.getElementById('bulkSelectedCount').textContent = count;
+      }
+
+      // For dynamic tables, observe mutations to keep checkboxes synced
+      const ensureRowCheckbox = (tr)=>{
+        if(tr.querySelector('td.__bulk_sel_cell')) return;
+
+        const cell = document.createElement('td');
+        cell.className = '__bulk_sel_cell';
+        cell.style.textAlign = 'center';
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.addEventListener('change', ()=>{
+          if(cb.checked){ selectedRows.add(tr); } else { selectedRows.delete(tr); }
+          tr.style.outline = cb.checked ? '2px solid rgba(31,122,140,.7)' : '';
+          tr.style.outlineOffset = cb.checked ? '-2px' : '';
+          refreshSelectedCount();
+        });
+        cell.appendChild(cb);
+        tr.insertBefore(cell, tr.firstElementChild);
+      };
+
+      // Initialize existing rows
+      Array.from(tbody.querySelectorAll('tr')).forEach(ensureRowCheckbox);
+
+      // Observe future row changes (when filtering/reloading)
+      const obs = new MutationObserver((muts)=>{
+        muts.forEach(m=>{
+          if(m.type === 'childList'){
+            m.addedNodes.forEach(node=>{
+              if(node.nodeType === 1 && node.tagName === 'TR'){
+                ensureRowCheckbox(node);
+              }
+            });
+          }
+        });
+      });
+      obs.observe(tbody, {childList:true});
+
+      // --- Populate the bulk target category dropdown by cloning the first row's GL select ---
+      const bulkCat = document.getElementById('bulkCategoryTarget');
+      function seedCategoryChoices(){
+        // Find first visible row with a GL Category select (5th col index per current layout)
+        const row = tbody.querySelector('tr');
+        if(!row) return;
+        // Column index of GL Category in current structure (after we added Select col): it shifts by +1.
+        // Original headers: Date | Account | Description | Check # | GL Category | Type | Debit | Credit | Running Net | Monthly Net | Cash Balance
+        // After insertion, GL Category is at cell index 5 (0-based): [0 Select][1 Date][2 Account][3 Desc][4 Check#][*5 GL*]
+        const glCell = row.children[5];
+        if(!glCell) return;
+        const glSel = glCell.querySelector('select');
+        if(!glSel) return;
+        if(bulkCat.getAttribute('data-seeded') === '1') return;
+        Array.from(glSel.options).forEach(opt=>{
+          const o = document.createElement('option');
+          o.value = opt.value;
+          o.textContent = opt.textContent;
+          bulkCat.appendChild(o);
+        });
+        bulkCat.setAttribute('data-seeded','1');
+      }
+      // Seed now (if possible) and also after slight delay in case rows render later
+      seedCategoryChoices();
+      setTimeout(seedCategoryChoices, 800);
+
+      // --- Select helpers ---
+      document.getElementById('bulkSelectAllFiltered').addEventListener('click', ()=>{
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        rows.forEach(tr=>{
+          // If row is visible (not filtered out)
+          const visible = tr.offsetParent !== null;
+          if(visible){
+            const cb = tr.querySelector('td.__bulk_sel_cell input[type="checkbox"]');
+            if(cb && !cb.checked){ cb.checked = true; cb.dispatchEvent(new Event('change',{bubbles:true})); }
+          }
+        });
+      });
+
+      document.getElementById('bulkClearSelection').addEventListener('click', ()=>{
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        rows.forEach(tr=>{
+          const cb = tr.querySelector('td.__bulk_sel_cell input[type="checkbox"]');
+          if(cb && cb.checked){ cb.checked = false; cb.dispatchEvent(new Event('change',{bubbles:true})); }
+        });
+      });
+
+      document.getElementById('bulkFindMatch').addEventListener('click', ()=>{
+        const term = (document.getElementById('bulkMatchText').value || '').trim().toLowerCase();
+        if(!term) return;
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        rows.forEach(tr=>{
+          const descCell = tr.children[3]; // After our insert: [0 Select][1 Date][2 Account][3 Description]
+          if(!descCell) return;
+          const text = (descCell.textContent || '').toLowerCase();
+          if(text.includes(term)){
+            const cb = tr.querySelector('td.__bulk_sel_cell input[type="checkbox"]');
+            if(cb && !cb.checked){ cb.checked = true; cb.dispatchEvent(new Event('change',{bubbles:true})); }
+          }
+        });
+      });
+
+      // --- Apply bulk category change ---
+      document.getElementById('bulkApplyCategory').addEventListener('click', ()=>{
+        const target = bulkCat.value;
+        if(!target){
+          alert('Choose a GL Category first.');
+          return;
+        }
+        let changed = 0;
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        rows.forEach(tr=>{
+          if(selectedRows.has(tr)){
+            // GL select at cell index 5 (see note above)
+            const glCell = tr.children[5];
+            if(!glCell) return;
+            const sel = glCell.querySelector('select');
+            if(!sel) return;
+            if(sel.value !== target){
+              sel.value = target;
+              // mark as manually edited (match existing styling behavior if present)
+              sel.style.border = '2px solid #10b981';
+              // trigger change so existing app recalcs ledgers/kpis
+              sel.dispatchEvent(new Event('change', {bubbles:true}));
+              changed++;
+            }
+          }
+        });
+        refreshSelectedCount();
+        alert(`Applied "${target}" to ${changed} transaction(s).`);
+      });
+
+      console.log('[BulkReassign] Ready.');
+    } catch(err){
+      console.error('[BulkReassign] Init error', err);
+    }
+  });
+})();
+</script>
+<!-- === /BULK REASSIGN: SCRIPT === -->
+
+</body>
+</html>
